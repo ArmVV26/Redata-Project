@@ -1,0 +1,225 @@
+version: 2
+       
+sources:
+  - name: redata_raw
+
+    description: >
+      Respuestas RAW de las APIs de Red Eléctrica de España (REData)
+      Cada tabla contiene una columna RAW_JSON (VARIANT) con la respuesta completa
+      de la API, más metadatos de la petición de ingesta.
+
+    database: "{{ env_var('DBT_ENVIRONMENTS', 'FAIL') }}_REDATA_BRONZE"
+    schema: RAW
+
+    # Snowflake no necesitia quoting asi que lo desactivo para evitar
+    # problemas con ids que mezclan mayúsculas/minúsculas.
+    quoting:
+      database: false
+      schema: false
+      identifier: false
+
+    # Freshness detecta cambios obsoletos
+    config:
+      freshness:
+        warn_after:
+          count: 24
+          period: hour
+        error_after:
+          count: 48
+          period: hour
+
+    tables:
+      - name: balance_response
+
+        description: >
+          Respuestas RAW del endpoint de balance/balance-eléctrico de REData.
+          Contiene datos de generación y consumo, por tecnología y zona geográfica.
+
+        config:
+          loaded_at_field: loaded_at 
+
+        columns:
+          - name: request_id
+            description: Identificador único de la petición de la ingesta.
+            data_type: varchar
+            data_tests:
+              - unique
+              - not_null
+
+          - name: loaded_at
+            description: Timestamp UTC en el que se cargó la respuesta en Bronze.
+            data_type: timestamp
+            data_tests:
+              - not_null
+
+          - name: source_url
+            description: URL completa del endpoint API consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: endpoint_name
+            description: Nombre lógico del endpoint REData consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: geo_id
+            description: Identificador geográfico de la zona consultada.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: time_trunc
+            description: Granularidad temporal de la consulta.
+            data_type: varchar
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments: 
+                    values: ['hour', 'day', 'month', 'year']
+                    severity: warn
+
+          - name: start_date
+            description: Fecha de inicio del rango consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: end_date
+            description: Fecha de fin del rango consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: raw_json
+            description: Respuesta JSON completa de la API, sin procesar.
+            data_type: variant
+            data_tests:
+              - not_null
+
+      - name: generation_response
+
+        description: >
+          Respuestas RAW del enpoint de generacion/estructura-generacion de REData.
+          Contiene datos de generación y consumo, por tecnología y zona geográfica.
+
+        config:
+          loaded_at_field: loaded_at 
+
+        columns:
+          - name: request_id
+            description: Identificador único de la petición de la ingesta.
+            data_type: varchar
+            data_tests:
+              - unique
+              - not_null
+
+          - name: loaded_at
+            description: Timestamp UTC en el que se cargó la respuesta en Bronze.
+            data_type: timestamp
+            data_tests:
+              - not_null
+
+          - name: source_url
+            description: URL completa del endpoint API consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: endpoint_name
+            description: Nombre lógico del endpoint REData consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: time_trunc
+            description: Granularidad temporal de la consulta.
+            data_type: varchar
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments: 
+                    values: ['hour', 'day', 'month', 'year']
+                    severity: warn
+
+          - name: start_date
+            description: Fecha de inicio del rango consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: end_date
+            description: Fecha de fin del rango consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: raw_json
+            description: Respuesta JSON completa de la API, sin procesar.
+            data_type: variant
+            data_tests:
+              - not_null
+
+      - name: market_response
+
+        description: >
+          Respuestas RAW del enpoint de mercados/componentes-precio-energia-cierre-desglose
+          de REData. Contiene datos de generación y consumo, por tecnología y zona geográfica.
+
+        config:
+          loaded_at_field: loaded_at 
+
+        columns:
+          - name: request_id
+            description: Identificador único de la petición de la ingesta.
+            data_type: varchar
+            data_tests:
+              - unique
+              - not_null
+
+          - name: loaded_at
+            description: Timestamp UTC en el que se cargó la respuesta en Bronze.
+            data_type: timestamp
+            data_tests:
+              - not_null
+
+          - name: source_url
+            description: URL completa del endpoint API consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: endpoint_name
+            description: Nombre lógico del endpoint REData consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: time_trunc
+            description: Granularidad temporal de la consulta.
+            data_type: varchar
+            data_tests:
+              - not_null
+              - accepted_values:
+                  arguments: 
+                    values: ['hour', 'day', 'month', 'year']
+                    severity: warn
+
+          - name: start_date
+            description: Fecha de inicio del rango consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: end_date
+            description: Fecha de fin del rango consultado.
+            data_type: varchar
+            data_tests:
+              - not_null
+
+          - name: raw_json
+            description: Respuesta JSON completa de la API, sin procesar.
+            data_type: variant
+            data_tests:
+              - not_null
