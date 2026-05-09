@@ -1,3 +1,9 @@
+/*
+    Staging de balance REData.
+    Aplana RAW_JSON desde BRONZE.RAW.BALANCE_RESPONSE.
+    Granularidad: request_id + geo_id + techonology_id + time_trunc + datetime_raw
+*/
+
 with
  
 src_balance_measurement as (
@@ -26,8 +32,8 @@ flattened_json as (
         inc.value:attributes:title::varchar         as energy_group,
         cont.value:attributes:composite::boolean    as is_composite,
         val.value:datetime::varchar                 as datetime_str,
-        val.value:value::float                      as value_mwh,
-        val.value:percentage::float                 as percentage
+        val.value:value::varchar                    as value_mwh,
+        val.value:percentage::varchar               as percentage
     from src_balance_measurement s,
         lateral flatten(input => s.raw_json:included) inc,
         lateral flatten(input => inc.value:attributes:content) cont,
@@ -47,11 +53,24 @@ renamed_casted as (
         technology_name::varchar                    as technology_name,
         energy_group::varchar                       as energy_group,
         is_composite::boolean                       as is_composite,
-        datetime_str::timestamp_ntz                 as datetime_raw,
-        value_mwh::float                            as value_mwh,
-        percentage::float                           as percentage
+        try_to_timestamp_ntz(datetime_str)          as datetime_raw,
+        try_to_double(value_mwh)                    as value_mwh,
+        try_to_double(percentage)                   as percentage
     from flattened_json
 
 )
  
-select * from renamed_casted
+select
+    request_id,
+    loaded_at,
+    endpoint_name,
+    geo_id,
+    time_trunc,
+    technology_id,
+    technology_name,
+    energy_group,
+    is_composite,
+    datetime_raw,
+    value_mwh,
+    percentage
+from renamed_casted
