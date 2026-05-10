@@ -1,6 +1,6 @@
 with
 
-stg_balance as (
+stg_generation as (
 
     select
         request_id,
@@ -23,19 +23,19 @@ ref_technology as (
 
 ),
 
-balance_joined as (
+generation_joined as (
     
     select
-        b.request_id,
-        b.loaded_at,
+        g.request_id,
+        g.loaded_at,
         t.technology_id,
-        b.time_trunc,
-        b.datetime_raw,
-        b.value_mwh,
-        b.percentage
-    from stg_balance b
+        g.time_trunc,
+        g.datetime_raw,
+        g.value_mwh,
+        g.percentage
+    from stg_generation g
     inner join ref_technology t
-        on b.technology_name = t.technology_name
+        on g.technology_name = t.technology_name
 
 ),
 
@@ -46,7 +46,7 @@ renamed_casted as (
             'technology_id',
             'time_trunc',
             'datetime_raw'
-        ]) }}                                       as balance_id,
+        ]) }}                                       as generation_id,
         technology_id::varchar                      as technology_id,
         time_trunc::varchar                         as time_trunc,
         datetime_raw::timestamp_ntz                 as datetime_ree,
@@ -54,12 +54,12 @@ renamed_casted as (
         percentage::float                           as percentage,
         request_id::varchar                         as request_id,
         loaded_at::timestamp_ntz                    as loaded_at
-    from balance_joined
+    from generation_joined
     
 )
 
 select
-    balance_id,
+    generation_id,
     technology_id,
     time_trunc,
     datetime_ree,
