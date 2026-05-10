@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: stg_balance_measurement
+  - name: stg_red_electrica__balance_measurement
 
     description: >
       Staging de mediciones de balance/balance-electrico. Aplana los registros de 
@@ -105,7 +105,7 @@ models:
               - datetime_raw
             severity: warn
 
-  - name: stg_generation_measurement
+  - name: stg_red_electrica__generation_measurement
 
     description: >
       Staging de mediciones de generacion/estructura-generacion. Aplana los registros de 
@@ -202,7 +202,7 @@ models:
               - datetime_raw
             severity: warn
 
-  - name: stg_market_measurement
+  - name: stg_red_electrica__market_measurement
     
     description: >
       Staging de mediciones de mercados/componentes-precio-energia-cierre-desglose. 
