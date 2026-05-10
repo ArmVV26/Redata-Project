@@ -100,7 +100,7 @@ models:
             combination_of_columns:
               - request_id
               - geo_id
-              - techonology_id
+              - technology_id
               - time_trunc
               - datetime_raw
             severity: warn
@@ -160,7 +160,7 @@ models:
           - not_null
           - accepted_values:
               arguments: 
-                values: ['Renovable', 'No-Renovable', 'Generación Total']
+                values: ['Renovable', 'No-Renovable', 'Generación total']
                 severity: warn
 
       - name: is_composite
@@ -197,7 +197,7 @@ models:
           arguments: 
             combination_of_columns:
               - request_id
-              - techonology_id
+              - technology_id
               - time_trunc
               - datetime_raw
             severity: warn
