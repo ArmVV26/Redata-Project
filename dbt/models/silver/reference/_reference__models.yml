@@ -37,7 +37,7 @@ models:
 
     description: >
       Tabla de referencia de componentes del precio de la electricidad de REData.
-      Construida a partir de los valores distintos del campo 'group_name' de
+      Construida a partir de los valores distintos del campo 'component_name' de
       stg_market_measurement.
       'component_id' es un surrogate generado sobre 'component_name'
   
@@ -45,13 +45,13 @@ models:
       - name: component_id
         description: >
           Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
-          'group_name'.
+          'component_name'.
         data_type: varchar
         data_tests:
           - unique
           - not_null
 
-      - name: standard_component_name
+      - name: redata_component_name
         description: >
           ID original del componente de precio tal como viene de la API de REData.
           Se conserva como trazabilidad pero no se usa como clave.
@@ -74,13 +74,23 @@ models:
       - name: is_composite
         description: Indica si el componente es un agregado compuesto.
         data_type: boolean
+        data_tests:
+          - not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments: 
+            combination_of_columns:
+              - component_name
+              - group_name
+            severity: warn
 
   - name: ref_regions
 
     description: >
       Tabla de referencia de ámbitos geográficos de REData.
       Construida desde el seed regions.
-      Contiene las regiones y sistemas eléctricos sobre los que REData pública datos.
+      Contiene las regiones y sistemas eléctricos sobre los que REData publica datos.
   
     columns:
       - name: region_id
@@ -124,9 +134,9 @@ models:
           - unique
           - not_null
 
-      - name: standard_technology_name
+      - name: redata_technology_name
         description: >
-          ID original de la tecnoplogía tal como viene de la API de REData.
+          ID original de la tecnología tal como viene de la API de REData.
           Se conserva como trazabilidad pero no se usa como clave.
         data_type: varchar
         data_tests:
@@ -153,3 +163,11 @@ models:
         data_type: boolean
         data_tests:
           - not_null
+    
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments: 
+            combination_of_columns:
+              - technology_name
+              - energy_category_id
+            severity: warn

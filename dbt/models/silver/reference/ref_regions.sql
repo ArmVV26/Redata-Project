@@ -1,3 +1,10 @@
+/*
+    Construye la tabla de referencia de ámbitos geográficos a parir del 
+    seed de regions.
+    Granularidad: region_name
+    Clave: region_id, equivalente al geo_id original. 
+*/
+
 with
 
 src_regions as (

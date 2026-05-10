@@ -1,3 +1,10 @@
+/*
+    Construye la tabla de referencia de tecnologías eléctricas a partir de las
+    tecnologías presentes en los modelos staging balance y generation.
+    Granularidad: technology_name + energy_category_id
+    Clave: technology_id, generada a partir de technology_name y energy_category_id. 
+*/
+
 with
 
 src_balance as (
@@ -67,11 +74,14 @@ energy_category as (
 renamed_casted as (
 
     select
-        {{ dbt_utils.generate_surrogate_key(['t.technology_name']) }}   as technology_id,
-        t.technology_id::varchar                                        as standard_technology_name,
-        t.technology_name::varchar                                      as technology_name,
-        e.energy_category_id::varchar                                   as energy_category_id,
-        t.is_composite::boolean                                         as is_composite
+        {{ dbt_utils.generate_surrogate_key([
+            't.technology_name',
+            'e.energy_category_id'
+        ]) }}                                           as technology_id,
+        t.technology_id::varchar                        as redata_technology_name,
+        t.technology_name::varchar                      as technology_name,
+        e.energy_category_id::varchar                   as energy_category_id,
+        t.is_composite::boolean                         as is_composite
     from technology_deduplicado t
     inner join energy_category e
         on t.energy_group = e.energy_category_name
@@ -80,7 +90,7 @@ renamed_casted as (
 
 select
     technology_id,
-    standard_technology_name,
+    redata_technology_name,
     technology_name,
     energy_category_id,
     is_composite

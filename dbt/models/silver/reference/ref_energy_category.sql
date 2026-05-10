@@ -1,3 +1,10 @@
+/*
+    Construye la tabla de referencia de categorías energéticas a partir de los
+    grupos energéticos presentes en los modelos staging balance y generation.
+    Granularidad: energy_category_name
+    Clave: energy_category_id, generada a partir de energy_category_name. 
+*/
+
 with
 
 src_balance as (
@@ -34,7 +41,7 @@ renamed_casted as (
         {{ dbt_utils.generate_surrogate_key(['energy_group']) }}    as energy_category_id,
         energy_group::varchar                                       as energy_category_name,
         case
-            when lower(energy_group) like 'renovable' then true
+            when lower(trim(energy_group)) = 'renovable' then true
             else false
         end::boolean                                                as is_renewable
     from union_energy_group
