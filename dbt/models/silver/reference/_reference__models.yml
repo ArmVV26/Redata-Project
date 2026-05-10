@@ -1,0 +1,155 @@
+version: 2
+
+models:
+  - name: ref_energy_category
+
+    description: >
+      Tabla de referencia de categorías energéticas.
+      Construida a partir de los valores distintos del campo 'energy_group'
+      de stg_balance_measurement y stg_generation_measurement.
+      'energy_category_id' es un surrogate generado sobre 'energy_category_name'.
+ 
+    columns:
+      - name: energy_category_id
+        description: >
+          Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
+          'energy_group'.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: energy_category_name
+        description: Nombre del grupo energético tal como viene de la API de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: is_renewable
+        description: >
+          Flag que indica si la categoría corresponde a generación renovable.
+          Derivado via CASE sobre energy_category_name.
+        data_type: boolean
+        data_tests:
+          - not_null
+
+  - name: ref_price_component
+
+    description: >
+      Tabla de referencia de componentes del precio de la electricidad de REData.
+      Construida a partir de los valores distintos del campo 'group_name' de
+      stg_market_measurement.
+      'component_id' es un surrogate generado sobre 'component_name'
+  
+    columns:
+      - name: component_id
+        description: >
+          Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
+          'group_name'.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: standard_component_name
+        description: >
+          ID original del componente de precio tal como viene de la API de REData.
+          Se conserva como trazabilidad pero no se usa como clave.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: component_name
+        description: Nombre del componente de precio tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: group_name
+        description: Grupo al que pertenece el componente según REData
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: is_composite
+        description: Indica si el componente es un agregado compuesto.
+        data_type: boolean
+
+  - name: ref_regions
+
+    description: >
+      Tabla de referencia de ámbitos geográficos de REData.
+      Construida desde el seed regions.
+      Contiene las regiones y sistemas eléctricos sobre los que REData pública datos.
+  
+    columns:
+      - name: region_id
+        description: Identificador geográfico de REData.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: region_name
+        description: Nombre descriptivo del ámbito geográfico.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: region_type
+        description: Tipo de denominación geográfica que le da REData
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['peninsular', 'canarias', 'baleares', 'ceuta', 'melilla', 'ccaa']
+                severity: warn
+
+  - name: ref_technology
+
+    description: >
+      Tabla de referencia de tecnologías de generación eléctrica según REData.
+      Construida a partir de los valores distintos del campo 'technology_name' de 
+      stg_balance_measurement y stg_generation_measurement.
+      'technology_id' es un surrogate generado sobre 'technology_name'.
+  
+    columns:
+      - name: technology_id
+        description: >
+          Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
+          'technology_name'. 
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: standard_technology_name
+        description: >
+          ID original de la tecnoplogía tal como viene de la API de REData.
+          Se conserva como trazabilidad pero no se usa como clave.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: technology_name
+        description: Nombre de la tecnología tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: energy_category_id
+        description: FK hacia energy_category.energy_category_id.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('ref_energy_category')
+                field: energy_category_id
+
+      - name: is_composite
+        description: Indica si la tecnología es un agregado compuesto.
+        data_type: boolean
+        data_tests:
+          - not_null
