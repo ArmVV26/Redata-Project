@@ -1,0 +1,231 @@
+version: 2
+
+models:
+  - name: balance_measurements
+
+    description: >
+      Tabla core de mediciones del Balance Elétrico de REData.
+      'balance_id' es un surrogate generado sobre: technology_id, geo_id,
+      time_trunc y datetime_ree.
+      Granularidad: technology_id + geo_id + time_trunc + datetime_ree
+  
+    columns:
+      - name: balance_id
+        description: >
+          Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
+          'technology_id', 'geo_id', 'time_trunc' y 'datetime_ree'.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: technology_id
+        description: FK hacia technology.technology_id.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('ref_technology')
+                field: technology_id
+
+      - name: region_id
+        description: FK hacia region.region_id
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('ref_regions')
+                field: region_id
+
+      - name: time_trunc
+        description: Granularidad temporal de la medición.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['hour', 'day', 'month', 'year']
+                severity: warn
+
+      - name: datetime_ree
+        description: Timestamp de la medición, renombrado desde 'datetime_raw'.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: value_mwh
+        description: Valor energético en MWh.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: percentage
+        description: Porcentaje sobre el total en el instante dado.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments: 
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: request_id
+        description: Trazabilidad hacia la petición de ingesta de origen en Bronze.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: loaded_at
+        description: Timestamp de carga en Bronze del registro de origen.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+  - name: generation_measurements
+
+    description: >
+      Tabla core de mediciones de Generación Elétrico por Tecnología de REData.
+      'generation_id' es un surrogate generado sobre: technology_id, time_trunc 
+      y datetime_ree.
+      Granularidad: technology_id + time_trunc + datetime_ree
+  
+    columns:
+      - name: generation_id
+        description: >
+          Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
+          'technology_id', 'time_trunc' y 'datetime_ree'.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: technology_id
+        description: FK hacia technology.technology_id.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('ref_technology')
+                field: technology_id
+
+      - name: time_trunc
+        description: Granularidad temporal de la medición.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['hour', 'day', 'month', 'year']
+                severity: warn
+
+      - name: datetime_ree
+        description: Timestamp de la medición, renombrado desde 'datetime_raw'.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: value_mwh
+        description: Valor de generación en MWh.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: percentage
+        description: Porcentaje sobre el total en el instante dado.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments: 
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: request_id
+        description: Trazabilidad hacia la petición de ingesta de origen en Bronze.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: loaded_at
+        description: Timestamp de carga en Bronze del registro de origen.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+  - name: market_measurements
+
+    description: >
+      Tabla core de mediciones de Componentes del Precio Final de Electricidad de REData.
+      'market_id' es un surrogate generado sobre: component_id, time_trunc 
+      y datetime_ree.
+      Granularidad: component_id + time_trunc + datetime_ree
+  
+    columns:
+      - name: market_id
+        description: >
+          Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
+          'component_id', 'time_trunc' y 'datetime_ree'.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: component_id
+        description: FK hacia price_component.component_id.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments: 
+                to: ref('ref_price_component')
+                field: component_id
+
+      - name: time_trunc
+        description: Granularidad temporal de la medición.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['hour', 'day', 'month', 'year']
+                severity: warn
+
+      - name: datetime_ree
+        description: Timestamp de la medición, renombrado desde 'datetime_raw'.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: value_eur_mwh
+        description: Valor del componente de precio en EUR/MWh.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: percentage
+        description: Porcentaje sobre el total en el instante dado.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments: 
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: request_id
+        description: Trazabilidad hacia la petición de ingesta de origen en Bronze.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: loaded_at
+        description: Timestamp de carga en Bronze del registro de origen.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
