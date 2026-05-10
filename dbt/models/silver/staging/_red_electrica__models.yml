@@ -62,7 +62,7 @@ models:
           - not_null
           - accepted_values:
               arguments: 
-                values: ['Renovable', 'No-Renovable', 'Demanda']
+                values: ['Renovable', 'No-Renovable', 'Demanda', 'Almacenamiento']
                 severity: warn
 
       - name: is_composite

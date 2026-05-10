@@ -1,0 +1,20 @@
+geo_id,geo_name,geo_type
+8741,Peninsular,peninsular
+8742,Canarias,canarias
+8743,Baleares,baleares
+8744,Ceuta,ceuta
+8745,Melilla,melilla
+4,Andalucía,ccaa
+5,Aragón,ccaa
+6,Cantabria,ccaa
+7,Castilla la Mancha,ccaa
+8,Castilla y León,ccaa
+9,Cataluña,ccaa
+10,País Vasco,ccaa
+11,Principado de Asturias,ccaa
+13,Comunidad de Madrid,ccaa
+14,Comunidad de Navarra,ccaa
+15,Comunidad de Valencia,ccaa
+16,Extremadura,ccaa
+20,La Rioja,ccaa
+21,Región de Murcia,ccaa
