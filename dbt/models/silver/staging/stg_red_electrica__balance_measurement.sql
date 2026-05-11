@@ -1,7 +1,7 @@
 /*
     Staging de balance REData.
     Aplana RAW_JSON desde BRONZE.RAW.BALANCE_RESPONSE.
-    Granularidad: request_id + geo_id + techonology_id + time_trunc + datetime_raw
+    Granularidad: request_id + geo_id + techonology_id + time_trunc + datetime_ree
 */
 
 with
@@ -53,9 +53,9 @@ renamed_casted as (
         technology_name::varchar                    as technology_name,
         energy_group::varchar                       as energy_group,
         is_composite::boolean                       as is_composite,
-        try_to_timestamp_ntz(datetime_str)          as datetime_raw,
+        try_to_timestamp_ntz(datetime_str)          as datetime_ree,
         try_to_double(value_mwh)                    as value_mwh,
-        try_to_double(percentage)                   as percentage
+        try_to_double(percentage)                   as source_percentage
     from flattened_json
 
 )
@@ -70,7 +70,7 @@ select
     technology_name,
     energy_group,
     is_composite,
-    datetime_raw,
+    datetime_ree,
     value_mwh,
-    percentage
+    source_percentage
 from renamed_casted
