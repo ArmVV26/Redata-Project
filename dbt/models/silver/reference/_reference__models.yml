@@ -134,7 +134,7 @@ models:
           - unique
           - not_null
 
-      - name: redata_technology_name
+      - name: redata_technology_id
         description: >
           ID original de la tecnología tal como viene de la API de REData.
           Se conserva como trazabilidad pero no se usa como clave.

@@ -55,6 +55,12 @@ models:
         data_tests:
           - not_null
 
+      - name: period_start_date
+        description: Fecha de inicio del periodo representado por la medición.
+        data_type: date
+        data_tests:
+          - not_null
+
       - name: value_mwh
         description: Valor energético en MWh.
         data_type: float
@@ -125,6 +131,12 @@ models:
       - name: datetime_ree
         description: Timestamp de la medición, renombrado desde 'datetime_ree'.
         data_type: timestamp_ntz
+        data_tests:
+          - not_null
+      
+      - name: period_start_date
+        description: Fecha de inicio del periodo representado por la medición.
+        data_type: date
         data_tests:
           - not_null
 
@@ -198,6 +210,12 @@ models:
       - name: datetime_ree
         description: Timestamp de la medición, renombrado desde 'datetime_ree'.
         data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: period_start_date
+        description: Fecha de inicio del periodo representado por la medición.
+        data_type: date
         data_tests:
           - not_null
 
