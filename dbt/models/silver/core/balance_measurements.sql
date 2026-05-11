@@ -1,3 +1,13 @@
+/*
+    Construye la tabla core de mediciones de balance eléctrico a partir de
+    stg_balance_measurement y las referencias de tecnología y región.
+    Granularidad: technology_id + region_id + time_trunc + datetime_raw
+    Clave: balance_id, generada a partir de technology_id, region_id, 
+    time_trunc y datetime_raw.
+
+    Mantiene la última carga disponible por medición usando loaded_at.
+*/
+
 with
 
 stg_balance as (
@@ -45,10 +55,29 @@ balance_joined as (
         b.value_mwh,
         b.percentage
     from stg_balance b
-    inner join ref_technology t
+    left join ref_technology t
         on b.technology_name = t.technology_name
-    inner join ref_regions r
+    left join ref_regions r
         on b.geo_id = r.region_id
+
+),
+
+balance_deduplicado as (
+
+    select
+        request_id,
+        loaded_at,
+        technology_id,
+        region_id,
+        time_trunc,
+        datetime_raw,
+        value_mwh,
+        percentage,
+        row_number() over(
+            partition by technology_id, region_id, time_trunc, datetime_raw
+            order by loaded_at desc
+        ) as ranking
+    from balance_joined
 
 ),
 
@@ -69,7 +98,8 @@ renamed_casted as (
         percentage::float                           as percentage,
         request_id::varchar                         as request_id,
         loaded_at::timestamp_ntz                    as loaded_at
-    from balance_joined
+    from balance_deduplicado
+    where ranking = 1
     
 )
 

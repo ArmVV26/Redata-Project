@@ -1,3 +1,13 @@
+/*
+    Construye la tabla core de mediciones de componentes del precio de la 
+    electricidad a partir de stg_market_measurement y la referencia de price_component.
+    Granularidad: component_id + time_trunc + datetime_raw
+    Clave: market_id, generada a partir de component_id, time_trunc 
+    y datetime_raw.
+
+    Mantiene la última carga disponible por medición usando loaded_at.
+*/
+
 with
 
 stg_market as (
@@ -7,6 +17,7 @@ stg_market as (
         loaded_at,
         time_trunc,
         component_name,
+        group_name,
         datetime_raw,
         value_eur_mwh,
         percentage
@@ -14,11 +25,12 @@ stg_market as (
 
 ),
 
-ref_component as (
+ref_price_component as (
 
     select
         component_id,
-        component_name
+        component_name,
+        group_name
     from {{ ref('ref_price_component') }}
 
 ),
@@ -34,8 +46,27 @@ market_joined as (
         m.value_eur_mwh,
         m.percentage
     from stg_market m
-    inner join ref_component c
+    left join ref_price_component c
         on m.component_name = c.component_name
+        and m.group_name = c.group_name
+
+),
+
+market_deduplicado as (
+
+    select
+        request_id,
+        loaded_at,
+        component_id,
+        time_trunc,
+        datetime_raw,
+        value_eur_mwh,
+        percentage,
+        row_number() over(
+            partition by component_id, time_trunc, datetime_raw
+            order by loaded_at desc
+        ) as ranking
+    from market_joined
 
 ),
 
@@ -54,7 +85,8 @@ renamed_casted as (
         percentage::float                           as percentage,
         request_id::varchar                         as request_id,
         loaded_at::timestamp_ntz                    as loaded_at
-    from market_joined
+    from market_deduplicado
+    where ranking = 1
     
 )
 
