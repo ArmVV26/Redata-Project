@@ -14,7 +14,7 @@ src_market as (
         component_name,
         group_name,
         is_composite
-    from {{ ref('stg_market_measurement') }}
+    from {{ ref('stg_red_electrica__market_measurement') }}
 
 ),
 

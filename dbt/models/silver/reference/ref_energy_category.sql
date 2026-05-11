@@ -11,7 +11,7 @@ src_balance as (
 
     select
         energy_group
-    from {{ ref('stg_balance_measurement') }}
+    from {{ ref('stg_red_electrica__balance_measurement') }}
 
 ),
 
@@ -19,7 +19,7 @@ src_generation as (
 
     select
         energy_group
-    from {{ ref('stg_generation_measurement') }}
+    from {{ ref('stg_red_electrica__generation_measurement') }}
 
 ),
 

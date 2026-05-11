@@ -14,7 +14,7 @@ src_balance as (
         technology_name,
         energy_group,
         is_composite
-    from {{ ref('stg_balance_measurement') }}
+    from {{ ref('stg_red_electrica__balance_measurement') }}
 
 ),
 
@@ -25,7 +25,7 @@ src_generation as (
         technology_name,
         energy_group,
         is_composite
-    from {{ ref('stg_generation_measurement') }}
+    from {{ ref('stg_red_electrica__generation_measurement') }}
 
 ),
 
