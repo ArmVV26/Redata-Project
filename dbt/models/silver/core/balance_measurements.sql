@@ -1,9 +1,9 @@
 /*
     Construye la tabla core de mediciones de balance eléctrico a partir de
     stg_balance_measurement y las referencias de tecnología y región.
-    Granularidad: technology_id + region_id + time_trunc + datetime_raw
+    Granularidad: technology_id + region_id + time_trunc + datetime_ree
     Clave: balance_id, generada a partir de technology_id, region_id, 
-    time_trunc y datetime_raw.
+    time_trunc y datetime_ree.
 
     Mantiene la última carga disponible por medición usando loaded_at.
 */
@@ -18,9 +18,9 @@ stg_balance as (
         geo_id,
         time_trunc,
         technology_name,
-        datetime_raw,
+        datetime_ree,
         value_mwh,
-        percentage
+        source_percentage
     from {{ ref('stg_red_electrica__balance_measurement') }}
 
 ),
@@ -51,9 +51,9 @@ balance_joined as (
         t.technology_id,
         r.region_id,
         b.time_trunc,
-        b.datetime_raw,
+        b.datetime_ree,
         b.value_mwh,
-        b.percentage
+        b.source_percentage
     from stg_balance b
     left join ref_technology t
         on b.technology_name = t.technology_name
@@ -70,11 +70,11 @@ balance_deduplicado as (
         technology_id,
         region_id,
         time_trunc,
-        datetime_raw,
+        datetime_ree,
         value_mwh,
-        percentage,
+        source_percentage,
         row_number() over(
-            partition by technology_id, region_id, time_trunc, datetime_raw
+            partition by technology_id, region_id, time_trunc, datetime_ree
             order by loaded_at desc
         ) as ranking
     from balance_joined
@@ -88,14 +88,25 @@ renamed_casted as (
             'technology_id',
             'region_id',
             'time_trunc',
-            'datetime_raw'
+            'datetime_ree'
         ]) }}                                       as balance_id,
         technology_id::varchar                      as technology_id,
         region_id::varchar                          as region_id,
         time_trunc::varchar                         as time_trunc,
-        datetime_raw::timestamp_ntz                 as datetime_ree,
+        datetime_ree::timestamp_ntz                 as datetime_ree,
+
+        case
+            when time_trunc = 'month' 
+                then cast(date_trunc('month', datetime_ree) as date)
+            when time_trunc = 'day' 
+                then cast(date_trunc('day', datetime_ree) as date)
+            when time_trunc = 'hour' 
+                then cast(date_trunc('hour', datetime_ree) as date)
+            else cast(datetime_ree as date)
+        end                                         as period_start_date,
+        
         value_mwh::float                            as value_mwh,
-        percentage::float                           as percentage,
+        source_percentage::float                    as source_percentage,
         request_id::varchar                         as request_id,
         loaded_at::timestamp_ntz                    as loaded_at
     from balance_deduplicado
@@ -109,8 +120,9 @@ select
     region_id,
     time_trunc,
     datetime_ree,
+    period_start_date,
     value_mwh,
-    percentage,
+    source_percentage,
     request_id,
     loaded_at
 from renamed_casted

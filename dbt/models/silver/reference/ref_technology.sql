@@ -78,7 +78,7 @@ renamed_casted as (
             't.technology_name',
             'e.energy_category_id'
         ]) }}                                           as technology_id,
-        t.technology_id::varchar                        as redata_technology_name,
+        t.technology_id::varchar                        as redata_technology_id,
         t.technology_name::varchar                      as technology_name,
         e.energy_category_id::varchar                   as energy_category_id,
         t.is_composite::boolean                         as is_composite
@@ -90,7 +90,7 @@ renamed_casted as (
 
 select
     technology_id,
-    redata_technology_name,
+    redata_technology_id,
     technology_name,
     energy_category_id,
     is_composite

@@ -1,9 +1,9 @@
 /*
     Construye la tabla core de mediciones de generación eléctrica por tecnología
     a partir de stg_generation_measurement y la referencia de tecnología.
-    Granularidad: technology_id + time_trunc + datetime_raw
+    Granularidad: technology_id + time_trunc + datetime_ree
     Clave: generation_id, generada a partir de technology_id, time_trunc 
-    y datetime_raw.
+    y datetime_ree.
 
     Mantiene la última carga disponible por medición usando loaded_at.
 */
@@ -18,9 +18,9 @@ stg_generation as (
         time_trunc,
         technology_name,
         energy_group,
-        datetime_raw,
+        datetime_ree,
         value_mwh,
-        percentage
+        source_percentage
     from {{ ref('stg_red_electrica__generation_measurement') }}
 
 ),
@@ -42,9 +42,9 @@ generation_joined as (
         g.loaded_at,
         t.technology_id,
         g.time_trunc,
-        g.datetime_raw,
+        g.datetime_ree,
         g.value_mwh,
-        g.percentage
+        g.source_percentage
     from stg_generation g
     left join {{ ref('ref_energy_category') }} e
         on g.energy_group = e.energy_category_name
@@ -61,11 +61,11 @@ generation_deduplicado as (
         loaded_at,
         technology_id,
         time_trunc,
-        datetime_raw,
+        datetime_ree,
         value_mwh,
-        percentage,
+        source_percentage,
         row_number() over(
-            partition by technology_id, time_trunc, datetime_raw
+            partition by technology_id, time_trunc, datetime_ree
             order by loaded_at desc
         ) as ranking
     from generation_joined
@@ -78,13 +78,24 @@ renamed_casted as (
         {{ dbt_utils.generate_surrogate_key([
             'technology_id',
             'time_trunc',
-            'datetime_raw'
+            'datetime_ree'
         ]) }}                                       as generation_id,
         technology_id::varchar                      as technology_id,
         time_trunc::varchar                         as time_trunc,
-        datetime_raw::timestamp_ntz                 as datetime_ree,
+        datetime_ree::timestamp_ntz                 as datetime_ree,
+
+        case
+            when time_trunc = 'month' 
+                then cast(date_trunc('month', datetime_ree) as date)
+            when time_trunc = 'day' 
+                then cast(date_trunc('day', datetime_ree) as date)
+            when time_trunc = 'hour' 
+                then cast(date_trunc('hour', datetime_ree) as date)
+            else cast(datetime_ree as date)
+        end                                         as period_start_date,
+
         value_mwh::float                            as value_mwh,
-        percentage::float                           as percentage,
+        source_percentage::float                    as source_percentage,
         request_id::varchar                         as request_id,
         loaded_at::timestamp_ntz                    as loaded_at
     from generation_deduplicado
@@ -97,8 +108,9 @@ select
     technology_id,
     time_trunc,
     datetime_ree,
+    period_start_date,
     value_mwh,
-    percentage,
+    source_percentage,
     request_id,
     loaded_at
 from renamed_casted

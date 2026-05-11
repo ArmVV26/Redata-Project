@@ -50,8 +50,14 @@ models:
                 severity: warn
 
       - name: datetime_ree
-        description: Timestamp de la medición, renombrado desde 'datetime_raw'.
+        description: Timestamp de la medición, renombrado desde 'datetime_ree'.
         data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: period_start_date
+        description: Fecha de inicio del periodo representado por la medición.
+        data_type: date
         data_tests:
           - not_null
 
@@ -61,7 +67,7 @@ models:
         data_tests:
           - not_null
 
-      - name: percentage
+      - name: source_percentage
         description: Porcentaje sobre el total en el instante dado.
         data_type: float
         data_tests:
@@ -123,8 +129,14 @@ models:
                 severity: warn
 
       - name: datetime_ree
-        description: Timestamp de la medición, renombrado desde 'datetime_raw'.
+        description: Timestamp de la medición, renombrado desde 'datetime_ree'.
         data_type: timestamp_ntz
+        data_tests:
+          - not_null
+      
+      - name: period_start_date
+        description: Fecha de inicio del periodo representado por la medición.
+        data_type: date
         data_tests:
           - not_null
 
@@ -134,7 +146,7 @@ models:
         data_tests:
           - not_null
 
-      - name: percentage
+      - name: source_percentage
         description: Porcentaje sobre el total en el instante dado.
         data_type: float
         data_tests:
@@ -196,8 +208,14 @@ models:
                 severity: warn
 
       - name: datetime_ree
-        description: Timestamp de la medición, renombrado desde 'datetime_raw'.
+        description: Timestamp de la medición, renombrado desde 'datetime_ree'.
         data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: period_start_date
+        description: Fecha de inicio del periodo representado por la medición.
+        data_type: date
         data_tests:
           - not_null
 
@@ -207,7 +225,7 @@ models:
         data_tests:
           - not_null
 
-      - name: percentage
+      - name: source_percentage
         description: Porcentaje sobre el total en el instante dado.
         data_type: float
         data_tests:

@@ -1,7 +1,7 @@
 /*
     Staging de mercado REData.
     Aplana RAW_JSON desde BRONZE.RAW.MARKET_RESPONSE.
-    Granularidad: request_id + component_id + time_trunc + datetime_raw
+    Granularidad: request_id + component_id + time_trunc + datetime_ree
 */
 
 with
@@ -50,9 +50,9 @@ renamed_casted as (
         component_name::varchar                     as component_name,
         group_name::varchar                         as group_name,
         is_composite::boolean                       as is_composite,
-        try_to_timestamp_ntz(datetime_str)          as datetime_raw,
+        try_to_timestamp_ntz(datetime_str)          as datetime_ree,
         try_to_double(value_eur_mwh)                as value_eur_mwh,
-        try_to_double(percentage)                   as percentage
+        try_to_double(percentage)                   as source_percentage
     from flattened_json
 
 )
@@ -66,7 +66,7 @@ select
     component_name,
     group_name,
     is_composite,
-    datetime_raw,
+    datetime_ree,
     value_eur_mwh,
-    percentage
+    source_percentage
 from renamed_casted

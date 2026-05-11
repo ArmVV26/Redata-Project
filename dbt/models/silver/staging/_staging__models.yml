@@ -6,7 +6,7 @@ models:
     description: >
       Staging de mediciones de balance/balance-electrico. Aplana los registros de 
       RAW_JSON de BALANCE_RESPONSE, renombra y castea tipos.
-      Granularidad: request_id + geo_id + technology_id + time_trunc + datetime_raw
+      Granularidad: request_id + geo_id + technology_id + time_trunc + datetime_ree
 
     columns:
       - name: request_id
@@ -71,7 +71,7 @@ models:
         data_tests:
           - not_null
           
-      - name: datetime_raw
+      - name: datetime_ree
         description: Datetime de la medición.
         data_type: timestamp_ntz
         data_tests:
@@ -83,7 +83,7 @@ models:
         data_tests:
           - not_null
 
-      - name: percentage
+      - name: source_percentage
         description: Porcentaje del total que representa esta tecnología.
         data_type: float
         data_tests:
@@ -102,7 +102,7 @@ models:
               - geo_id
               - technology_id
               - time_trunc
-              - datetime_raw
+              - datetime_ree
             severity: warn
 
   - name: stg_red_electrica__generation_measurement
@@ -110,7 +110,7 @@ models:
     description: >
       Staging de mediciones de generacion/estructura-generacion. Aplana los registros de 
       RAW_JSON de GENERATION_RESPONSE, renombra y castea tipos.
-      Granularidad: request_id + technology_id + time_trunc + datetime_raw
+      Granularidad: request_id + technology_id + time_trunc + datetime_ree
   
     columns:
       - name: request_id
@@ -169,7 +169,7 @@ models:
         data_tests:
           - not_null
           
-      - name: datetime_raw
+      - name: datetime_ree
         description: Datetime de la medición.
         data_type: timestamp_ntz
         data_tests:
@@ -181,7 +181,7 @@ models:
         data_tests:
           - not_null
 
-      - name: percentage
+      - name: source_percentage
         description: Porcentaje del total que representa esta tecnología.
         data_type: float
         data_tests:
@@ -199,7 +199,7 @@ models:
               - request_id
               - technology_id
               - time_trunc
-              - datetime_raw
+              - datetime_ree
             severity: warn
 
   - name: stg_red_electrica__market_measurement
@@ -207,7 +207,7 @@ models:
     description: >
       Staging de mediciones de mercados/componentes-precio-energia-cierre-desglose. 
       Aplana los registros de RAW_JSON de MARKET_RESPONSE, renombra y castea tipos.
-      Granularidad: request_id + component_id + time_trunc + datetime_raw
+      Granularidad: request_id + component_id + time_trunc + datetime_ree
    
     columns:
       - name: request_id
@@ -266,7 +266,7 @@ models:
         data_tests:
           - not_null
           
-      - name: datetime_raw
+      - name: datetime_ree
         description: Datetime de la medición.
         data_type: timestamp_ntz
         data_tests:
@@ -278,7 +278,7 @@ models:
         data_tests:
           - not_null
 
-      - name: percentage
+      - name: source_percentage
         description: Porcentaje del total que representa este componente de precio.
         data_type: float
         data_tests:
@@ -288,6 +288,7 @@ models:
                 min_value: 0
                 max_value: 1
                 severity: warn
+                
     data_tests:
       - dbt_utils.unique_combination_of_columns:
           arguments: 
@@ -295,5 +296,5 @@ models:
               - request_id
               - component_id
               - time_trunc
-              - datetime_raw
+              - datetime_ree
             severity: warn
