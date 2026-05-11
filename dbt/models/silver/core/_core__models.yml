@@ -5,9 +5,9 @@ models:
 
     description: >
       Tabla core de mediciones del Balance Elétrico de REData.
-      'balance_id' es un surrogate generado sobre: technology_id, geo_id,
+      'balance_id' es un surrogate generado sobre: technology_id, region_id,
       time_trunc y datetime_ree.
-      Granularidad: technology_id + geo_id + time_trunc + datetime_ree
+      Granularidad: technology_id + region_id + time_trunc + datetime_ree
   
     columns:
       - name: balance_id
