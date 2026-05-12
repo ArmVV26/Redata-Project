@@ -54,6 +54,11 @@ models:
         +materialized: table
       
     gold:
+      core:
+        +database: "{{ env_var('DBT_ENVIRONMENTS', 'FAIL') }}_REDATA_GOLD"
+        +schema: core
+        +materialized: table
+
       marts:
         +database: "{{ env_var('DBT_ENVIRONMENTS', 'FAIL') }}_REDATA_GOLD"
         +schema: marts
