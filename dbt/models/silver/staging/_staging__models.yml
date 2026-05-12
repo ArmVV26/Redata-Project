@@ -1,0 +1,300 @@
+version: 2
+
+models:
+  - name: stg_red_electrica__balance_measurement
+
+    description: >
+      Staging de mediciones de balance/balance-electrico. Aplana los registros de 
+      RAW_JSON de BALANCE_RESPONSE, renombra y castea tipos.
+      Granularidad: request_id + geo_id + technology_id + time_trunc + datetime_ree
+
+    columns:
+      - name: request_id
+        description: Identificador único de la petición de la ingesta.
+        data_type: varchar
+        data_tests:
+          - not_null
+          
+      - name: loaded_at
+        description: Timestamp de carga en Bronze.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: endpoint_name
+        description: Nombre lógico del endpoint REData consultado.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: geo_id
+        description: Identificador geográfico de la zona consultada.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: time_trunc
+        description: Granularidad temporal de la consulta.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['hour', 'day', 'month', 'year']
+                severity: warn
+
+      - name: technology_id
+        description: Identificador de la tecnología tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: technology_name
+        description: Nombre de la tecnología tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: energy_group
+        description: Grupo energético de la tecnología ("Renovable", "No Renovable" y otras opciones menos comunes)
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['Renovable', 'No-Renovable', 'Demanda', 'Almacenamiento']
+                severity: warn
+
+      - name: is_composite
+        description: Indica si la tecnología es un agregado compuesto.
+        data_type: boolean
+        data_tests:
+          - not_null
+          
+      - name: datetime_ree
+        description: Datetime de la medición.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: value_mwh
+        description: Valor energético en MWh para la tecnología y datetime.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: source_percentage
+        description: Porcentaje del total que representa esta tecnología.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments: 
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments: 
+            combination_of_columns:
+              - request_id
+              - geo_id
+              - technology_id
+              - time_trunc
+              - datetime_ree
+            severity: warn
+
+  - name: stg_red_electrica__generation_measurement
+
+    description: >
+      Staging de mediciones de generacion/estructura-generacion. Aplana los registros de 
+      RAW_JSON de GENERATION_RESPONSE, renombra y castea tipos.
+      Granularidad: request_id + technology_id + time_trunc + datetime_ree
+  
+    columns:
+      - name: request_id
+        description: Identificador único de la petición de la ingesta.
+        data_type: varchar
+        data_tests:
+          - not_null
+          
+      - name: loaded_at
+        description: Timestamp de carga en Bronze.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: endpoint_name
+        description: Nombre lógico del endpoint REData consultado.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: time_trunc
+        description: Granularidad temporal de la consulta.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['hour', 'day', 'month', 'year']
+                severity: warn
+
+      - name: technology_id
+        description: Identificador de la tecnología tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: technology_name
+        description: Nombre de la tecnología tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: energy_group
+        description: Grupo energético de la tecnología ("Renovable", "No Renovable" y otras opciones menos comunes)
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['Renovable', 'No-Renovable', 'Generación total']
+                severity: warn
+
+      - name: is_composite
+        description: Indica si la tecnología es un agregado compuesto.
+        data_type: boolean
+        data_tests:
+          - not_null
+          
+      - name: datetime_ree
+        description: Datetime de la medición.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: value_mwh
+        description: Valor energético en MWh para la tecnología y datetime.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: source_percentage
+        description: Porcentaje del total que representa esta tecnología.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments: 
+                min_value: 0
+                max_value: 1
+                severity: warn
+    
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments: 
+            combination_of_columns:
+              - request_id
+              - technology_id
+              - time_trunc
+              - datetime_ree
+            severity: warn
+
+  - name: stg_red_electrica__market_measurement
+    
+    description: >
+      Staging de mediciones de mercados/componentes-precio-energia-cierre-desglose. 
+      Aplana los registros de RAW_JSON de MARKET_RESPONSE, renombra y castea tipos.
+      Granularidad: request_id + component_id + time_trunc + datetime_ree
+   
+    columns:
+      - name: request_id
+        description: Identificador único de la petición de la ingesta.
+        data_type: varchar
+        data_tests:
+          - not_null
+          
+      - name: loaded_at
+        description: Timestamp de carga en Bronze.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: endpoint_name
+        description: Nombre lógico del endpoint REData consultado.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: time_trunc
+        description: Granularidad temporal de la consulta.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['hour', 'day', 'month', 'year']
+                severity: warn
+
+      - name: component_id
+        description: Identificador del componente de precio tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: component_name
+        description: Nombre del componente de precio tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: group_name
+        description: Nombre del grupo al que pertenece el componente de precio.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments: 
+                values: ['Servicios-ajuste', 'Precio total', 'Energia', 'Mercados', 'Servicios-pagos']
+                severity: warn
+
+      - name: is_composite
+        description: Indica si el component de precio es un agregado compuesto.
+        data_type: boolean
+        data_tests:
+          - not_null
+          
+      - name: datetime_ree
+        description: Datetime de la medición.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: value_eur_mwh
+        description: Precio en EUR/MWh para el componente y datetime.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: source_percentage
+        description: Porcentaje del total que representa este componente de precio.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments: 
+                min_value: 0
+                max_value: 1
+                severity: warn
+                
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments: 
+            combination_of_columns:
+              - request_id
+              - component_id
+              - time_trunc
+              - datetime_ree
+            severity: warn

@@ -1,4 +1,4 @@
-import logging
+import logging, json
 from config import ENDPOINTS, DATE_RANGES, BASE_URL, GEO_CANDIDATES
 from api_client import fetch_endpoint
 from snowflake_loader import get_connection, already_loaded, insert_record
@@ -42,8 +42,8 @@ def run():
                     extra_params = {}
                     if geo_id:
                         extra_params = {
-                            "geo_id": geo_id,
-                            "geo_limit": geo_limit
+                            "geo_limit": geo_limit,
+                            "geo_ids": geo_id
                         }
 
                     # Llamar a la API
@@ -73,8 +73,10 @@ def run():
                         time_trunc=endpoint["time_trunc"]
                     )
                     
+                    size = len(json.dumps(raw_data, ensure_ascii=False).encode('utf-8'))
+
                     conn.commit()
-                    logger.info(f"  [{start_date[:4]}-{end_date[:4]}] [{geo_label}] Insertado correctamente.\n")
+                    logger.info(f"  [{start_date[:4]}-{end_date[:4]}] [{geo_label}] [Size - {size}] Insertado correctamente \n")
                     total_inserted += 1
 
     finally:
