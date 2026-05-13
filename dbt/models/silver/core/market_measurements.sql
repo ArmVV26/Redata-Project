@@ -62,10 +62,17 @@ market_deduplicado as (
         datetime_ree,
         value_eur_mwh,
         source_percentage,
-        row_number() over(
-            partition by component_id, time_trunc, datetime_ree
-            order by loaded_at desc
-        ) as ranking
+        {{ deduplicate_by_latest(
+            partition_by=[
+                'component_id',
+                'time_trunc',
+                'datetime_ree'
+            ],
+            order_by=[
+                'loaded_at',
+                'request_id'
+            ]
+        ) }} as ranking
     from market_joined
 
 ),
@@ -81,17 +88,6 @@ renamed_casted as (
         component_id::varchar                       as component_id,
         time_trunc::varchar                         as time_trunc,
         datetime_ree::timestamp_ntz                 as datetime_ree,
-
-        case
-            when time_trunc = 'month' 
-                then cast(date_trunc('month', datetime_ree) as date)
-            when time_trunc = 'day' 
-                then cast(date_trunc('day', datetime_ree) as date)
-            when time_trunc = 'hour' 
-                then cast(date_trunc('hour', datetime_ree) as date)
-            else cast(datetime_ree as date)
-        end                                         as period_start_date,
-
         value_eur_mwh::float                        as value_eur_mwh,
         source_percentage::float                    as source_percentage,
         request_id::varchar                         as request_id,
@@ -106,7 +102,6 @@ select
     component_id,
     time_trunc,
     datetime_ree,
-    period_start_date,
     value_eur_mwh,
     source_percentage,
     request_id,
