@@ -1,3 +1,12 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='balance_id',
+        incremental_strategy='merge',
+        on_schema_change='fail'
+    )
+}}
+
 /*
     Construye la tabla core de mediciones de balance eléctrico a partir de
     stg_balance_measurement y las referencias de tecnología y región.
@@ -22,6 +31,13 @@ stg_balance as (
         value_mwh,
         source_percentage
     from {{ ref('stg_red_electrica__balance_measurement') }}
+
+    {% if is_incremental() %}
+        where loaded_at >= (
+            select coalesce(max(loaded_at), '1900-01-01'::timestamp_ntz)
+            from {{ this }}
+        )
+    {% endif %}
 
 ),
 
@@ -108,6 +124,8 @@ renamed_casted as (
         loaded_at::timestamp_ntz                    as loaded_at
     from balance_deduplicado
     where ranking = 1
+        and technology_id is not null
+        and region_id is not null
     
 )
 

@@ -1,3 +1,12 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='generation_id',
+        incremental_strategy='merge',
+        on_schema_change='fail'
+    )
+}}
+
 /*
     Construye la tabla core de mediciones de generación eléctrica por tecnología
     a partir de stg_generation_measurement y la referencia de tecnología.
@@ -22,6 +31,13 @@ stg_generation as (
         value_mwh,
         source_percentage
     from {{ ref('stg_red_electrica__generation_measurement') }}
+
+    {% if is_incremental() %}
+        where loaded_at >= (
+            select coalesce(max(loaded_at), '1900-01-01'::timestamp_ntz)
+            from {{ this }}
+        )
+    {% endif %}
 
 ),
 
@@ -96,6 +112,7 @@ renamed_casted as (
         loaded_at::timestamp_ntz                    as loaded_at
     from generation_deduplicado
     where ranking = 1
+        and technology_id is not null
     
 )
 

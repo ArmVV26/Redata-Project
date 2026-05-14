@@ -1,3 +1,12 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='market_id',
+        incremental_strategy='merge',
+        on_schema_change='fail'
+    )
+}}
+
 /*
     Construye la tabla core de mediciones de componentes del precio de la 
     electricidad a partir de stg_market_measurement y la referencia de price_component.
@@ -22,6 +31,13 @@ stg_market as (
         value_eur_mwh,
         source_percentage
     from {{ ref('stg_red_electrica__market_measurement') }}
+
+    {% if is_incremental() %}
+        where loaded_at >= (
+            select coalesce(max(loaded_at), '1900-01-01'::timestamp_ntz)
+            from {{ this }}
+        )
+    {% endif %}
 
 ),
 
@@ -94,6 +110,7 @@ renamed_casted as (
         loaded_at::timestamp_ntz                    as loaded_at
     from market_deduplicado
     where ranking = 1
+        and component_id is not null
     
 )
 
