@@ -1,3 +1,9 @@
+/*
+    Test de calidad para las tablas core.
+    Comprueba que datetime_ree y loaded_at no tengan fechas futuras
+    en generation_measurements, balance_measurements y market_measurements.
+*/
+
 with invalid_generation as (
 
     select

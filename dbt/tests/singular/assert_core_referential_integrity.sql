@@ -1,3 +1,9 @@
+/*
+    Test de integridad referencial para las tablas core.
+    Comprueba que las claves de tecnología, región y componente existan
+    en sus tablas de referencia correspondientes.
+*/
+
 with invalid_generation_technology as (
 
     select
