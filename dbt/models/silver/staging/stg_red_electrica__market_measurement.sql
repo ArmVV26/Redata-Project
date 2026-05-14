@@ -42,17 +42,17 @@ flattened_json as (
 renamed_casted as (
     
     select
-        request_id::varchar                         as request_id,
-        loaded_at::timestamp_ntz                    as loaded_at,
-        endpoint_name::varchar                      as endpoint_name,
-        time_trunc::varchar                         as time_trunc,
-        component_id::varchar                       as component_id,
-        component_name::varchar                     as component_name,
-        group_name::varchar                         as group_name,
-        is_composite::boolean                       as is_composite,
-        try_to_timestamp_ntz(datetime_str)          as datetime_ree,
-        try_to_double(value_eur_mwh)                as value_eur_mwh,
-        try_to_double(percentage)                   as source_percentage
+        request_id::varchar                             as request_id,
+        loaded_at::timestamp_ntz                        as loaded_at,
+        endpoint_name::varchar                          as endpoint_name,
+        {{ clean_text('time_trunc') }}::varchar         as time_trunc,
+        component_id::varchar                           as component_id,
+        {{ clean_text('component_name') }}::varchar     as component_name,
+        {{ clean_text('group_name') }}::varchar         as group_name,
+        is_composite::boolean                           as is_composite,
+        try_to_timestamp_ntz(datetime_str)              as datetime_ree,
+        try_to_double(value_eur_mwh)                    as value_eur_mwh,
+        try_to_double(percentage)                       as source_percentage
     from flattened_json
 
 )

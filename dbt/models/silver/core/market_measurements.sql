@@ -1,3 +1,12 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='market_id',
+        incremental_strategy='merge',
+        on_schema_change='fail'
+    )
+}}
+
 /*
     Construye la tabla core de mediciones de componentes del precio de la 
     electricidad a partir de stg_market_measurement y la referencia de price_component.
@@ -22,6 +31,13 @@ stg_market as (
         value_eur_mwh,
         source_percentage
     from {{ ref('stg_red_electrica__market_measurement') }}
+
+    {% if is_incremental() %}
+        where loaded_at >= (
+            select coalesce(max(loaded_at), '1900-01-01'::timestamp_ntz)
+            from {{ this }}
+        )
+    {% endif %}
 
 ),
 
@@ -62,10 +78,17 @@ market_deduplicado as (
         datetime_ree,
         value_eur_mwh,
         source_percentage,
-        row_number() over(
-            partition by component_id, time_trunc, datetime_ree
-            order by loaded_at desc
-        ) as ranking
+        {{ deduplicate_by_latest(
+            partition_by=[
+                'component_id',
+                'time_trunc',
+                'datetime_ree'
+            ],
+            order_by=[
+                'loaded_at',
+                'request_id'
+            ]
+        ) }} as ranking
     from market_joined
 
 ),
@@ -81,23 +104,13 @@ renamed_casted as (
         component_id::varchar                       as component_id,
         time_trunc::varchar                         as time_trunc,
         datetime_ree::timestamp_ntz                 as datetime_ree,
-
-        case
-            when time_trunc = 'month' 
-                then cast(date_trunc('month', datetime_ree) as date)
-            when time_trunc = 'day' 
-                then cast(date_trunc('day', datetime_ree) as date)
-            when time_trunc = 'hour' 
-                then cast(date_trunc('hour', datetime_ree) as date)
-            else cast(datetime_ree as date)
-        end                                         as period_start_date,
-
         value_eur_mwh::float                        as value_eur_mwh,
         source_percentage::float                    as source_percentage,
         request_id::varchar                         as request_id,
         loaded_at::timestamp_ntz                    as loaded_at
     from market_deduplicado
     where ranking = 1
+        and component_id is not null
     
 )
 
@@ -106,7 +119,6 @@ select
     component_id,
     time_trunc,
     datetime_ree,
-    period_start_date,
     value_eur_mwh,
     source_percentage,
     request_id,

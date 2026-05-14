@@ -51,7 +51,7 @@ models:
           - unique
           - not_null
 
-      - name: redata_component_name
+      - name: redata_component_id
         description: >
           ID original del componente de precio tal como viene de la API de REData.
           Se conserva como trazabilidad pero no se usa como clave.
