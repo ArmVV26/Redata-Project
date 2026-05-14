@@ -67,3 +67,7 @@ models:
 seeds: 
   +database: "{{ env_var('DBT_ENVIRONMENTS', 'FAIL') }}_REDATA_BRONZE"
   +schema: seeds
+
+snapshots: 
+  +database: "{{ env_var('DBT_ENVIRONMENTS', 'FAIL') }}_REDATA_SILVER"
+  +schema: snapshots

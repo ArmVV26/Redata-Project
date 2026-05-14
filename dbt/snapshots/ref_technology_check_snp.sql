@@ -9,7 +9,6 @@
 
 {{
     config(
-        target_database=env_var('DBT_ENVIRONMENTS', 'FAIL') ~ '_REDATA_SILVER',
         target_schema='snapshots',
         unique_key='redata_technology_id',
         strategy='check',
