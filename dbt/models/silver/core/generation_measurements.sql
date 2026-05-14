@@ -1,3 +1,12 @@
+{{
+    config(
+        materialized='incremental',
+        unique_key='generation_id',
+        incremental_strategy='merge',
+        on_schema_change='fail'
+    )
+}}
+
 /*
     Construye la tabla core de mediciones de generación eléctrica por tecnología
     a partir de stg_generation_measurement y la referencia de tecnología.
@@ -22,6 +31,13 @@ stg_generation as (
         value_mwh,
         source_percentage
     from {{ ref('stg_red_electrica__generation_measurement') }}
+
+    {% if is_incremental() %}
+        where loaded_at >= (
+            select coalesce(max(loaded_at), '1900-01-01'::timestamp_ntz)
+            from {{ this }}
+        )
+    {% endif %}
 
 ),
 
@@ -64,10 +80,17 @@ generation_deduplicado as (
         datetime_ree,
         value_mwh,
         source_percentage,
-        row_number() over(
-            partition by technology_id, time_trunc, datetime_ree
-            order by loaded_at desc
-        ) as ranking
+        {{ deduplicate_by_latest(
+            partition_by=[
+                'technology_id',
+                'time_trunc',
+                'datetime_ree'
+            ],
+            order_by=[
+                'loaded_at',
+                'request_id'
+            ]
+        ) }} as ranking
     from generation_joined
 
 ),
@@ -83,23 +106,13 @@ renamed_casted as (
         technology_id::varchar                      as technology_id,
         time_trunc::varchar                         as time_trunc,
         datetime_ree::timestamp_ntz                 as datetime_ree,
-
-        case
-            when time_trunc = 'month' 
-                then cast(date_trunc('month', datetime_ree) as date)
-            when time_trunc = 'day' 
-                then cast(date_trunc('day', datetime_ree) as date)
-            when time_trunc = 'hour' 
-                then cast(date_trunc('hour', datetime_ree) as date)
-            else cast(datetime_ree as date)
-        end                                         as period_start_date,
-
         value_mwh::float                            as value_mwh,
         source_percentage::float                    as source_percentage,
         request_id::varchar                         as request_id,
         loaded_at::timestamp_ntz                    as loaded_at
     from generation_deduplicado
     where ranking = 1
+        and technology_id is not null
     
 )
 
@@ -108,7 +121,6 @@ select
     technology_id,
     time_trunc,
     datetime_ree,
-    period_start_date,
     value_mwh,
     source_percentage,
     request_id,

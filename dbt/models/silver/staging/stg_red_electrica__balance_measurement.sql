@@ -44,18 +44,18 @@ flattened_json as (
 renamed_casted as (
     
     select
-        request_id::varchar                         as request_id,
-        loaded_at::timestamp_ntz                    as loaded_at,
-        endpoint_name::varchar                      as endpoint_name,
-        geo_id::varchar                             as geo_id,
-        time_trunc::varchar                         as time_trunc,
-        technology_id::varchar                      as technology_id,
-        technology_name::varchar                    as technology_name,
-        energy_group::varchar                       as energy_group,
-        is_composite::boolean                       as is_composite,
-        try_to_timestamp_ntz(datetime_str)          as datetime_ree,
-        try_to_double(value_mwh)                    as value_mwh,
-        try_to_double(percentage)                   as source_percentage
+        request_id::varchar                             as request_id,
+        loaded_at::timestamp_ntz                        as loaded_at,
+        endpoint_name::varchar                          as endpoint_name,
+        geo_id::varchar                                 as geo_id,
+        {{ clean_text('time_trunc') }}::varchar         as time_trunc,
+        technology_id::varchar                          as technology_id,
+        {{ clean_text('technology_name') }}::varchar    as technology_name,
+        {{ clean_text('energy_group') }}::varchar       as energy_group,
+        is_composite::boolean                           as is_composite,
+        try_to_timestamp_ntz(datetime_str)              as datetime_ree,
+        try_to_double(value_mwh)                        as value_mwh,
+        try_to_double(percentage)                       as source_percentage
     from flattened_json
 
 )

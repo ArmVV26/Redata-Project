@@ -1,0 +1,154 @@
+version: 2
+
+snapshots:
+  - name: ref_price_component_snapshot
+
+    description: >
+      Snapshot tipo check de la tabla de referencia ref_price_component.
+      Conserva el histórico de cambios de los componentes de precio de REData,
+      usando redata_component_id como clave estable de negocio y detectando cambios
+      en component_name, group_name e is_composite.
+
+    columns:
+      - name: dbt_scd_id
+        description: Identificador único generado por dbt para cada versión histórica del registro.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: dbt_updated_at
+        description: Timestamp usado por dbt para registrar cuándo se actualizó la versión del snapshot.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: dbt_valid_from
+        description: Timestamp desde el que la versión del registro es válida.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: dbt_valid_to
+        description: Timestamp hasta el que la versión del registro es válida. Es null para la versión vigente.
+        data_type: timestamp_ntz
+
+      - name: component_id
+        description: >
+          Clave surrogate del componente de precio en el modelo ref_price_component.
+          Se conserva en el snapshot como valor histórico asociado a la versión del registro.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: redata_component_id
+        description: >
+          ID original del componente de precio tal como viene de la API de REData.
+          Se usa como unique_key del snapshot.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: component_name
+        description: Nombre del componente de precio tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: group_name
+        description: Grupo al que pertenece el componente según REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: is_composite
+        description: Indica si el componente es un agregado compuesto.
+        data_type: boolean
+        data_tests:
+          - not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - redata_component_id
+              - dbt_valid_from
+            severity: warn
+
+  - name: ref_technology_check_snp
+
+    description: >
+      Snapshot tipo check de la tabla de referencia ref_technology.
+      Conserva el histórico de cambios de las tecnologías eléctricas de REData,
+      usando redata_technology_id como clave estable de negocio y detectando cambios
+      en technology_name, energy_category_id e is_composite.
+
+    columns:
+      - name: dbt_scd_id
+        description: Identificador único generado por dbt para cada versión histórica del registro.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: dbt_updated_at
+        description: Timestamp usado por dbt para registrar cuándo se actualizó la versión del snapshot.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: dbt_valid_from
+        description: Timestamp desde el que la versión del registro es válida.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: dbt_valid_to
+        description: Timestamp hasta el que la versión del registro es válida. Es null para la versión vigente.
+        data_type: timestamp_ntz
+
+      - name: technology_id
+        description: >
+          Clave surrogate de la tecnología en el modelo ref_technology.
+          Se conserva en el snapshot como valor histórico asociado a la versión del registro.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: redata_technology_id
+        description: >
+          ID original de la tecnología tal como viene de la API de REData.
+          Se usa como unique_key del snapshot.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: technology_name
+        description: Nombre de la tecnología tal como viene de REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: energy_category_id
+        description: FK hacia ref_energy_category.energy_category_id.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('ref_energy_category')
+                field: energy_category_id
+
+      - name: is_composite
+        description: Indica si la tecnología es un agregado compuesto.
+        data_type: boolean
+        data_tests:
+          - not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - redata_technology_id
+              - dbt_valid_from
+            severity: warn
