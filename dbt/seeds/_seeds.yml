@@ -1,0 +1,34 @@
+version: 2
+
+seeds:
+  - name: regions
+
+    description: >
+      Seed de ámbitos geográficos de REData.
+      Contiene los identificadores geográficos, nombres descriptivos y tipos de región
+      sobre los que Red Eléctrica publica datos.
+      Es la fuente de la tabla de referencia ref_regions.
+
+    columns:
+      - name: geo_id
+        description: Identificador geográfico de REData.
+        data_type: varchar
+        data_tests:
+          - unique
+          - not_null
+
+      - name: geo_name
+        description: Nombre descriptivo del ámbito geográfico.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: geo_type
+        description: Tipo de ámbito geográfico según REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['peninsular', 'canarias', 'baleares', 'ceuta', 'melilla', 'ccaa']
+                severity: warn

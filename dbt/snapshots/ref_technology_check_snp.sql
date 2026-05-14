@@ -1,3 +1,10 @@
+/*
+    Snapshot de tecnologías eléctricas de REData.
+    Detecta cambios en el nombre, categoría energética o flag de tecnología compuesta.
+    Granularidad: redata_technology_id
+    Clave: redata_technology_id
+*/
+
 {% snapshot ref_technology_check_snp %}
 
 {{
