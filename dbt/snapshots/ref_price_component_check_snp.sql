@@ -5,7 +5,7 @@
     Clave: redata_component_id
 */
 
-{% snapshot ref_price_component_snapshot %}
+{% snapshot ref_price_component_check_snp %}
 
 {{
     config(

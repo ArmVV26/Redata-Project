@@ -47,7 +47,8 @@ ref_technology as (
         technology_id,
         technology_name,
         energy_category_id
-    from {{ ref('ref_technology') }}
+    from {{ ref('ref_technology_check_snp') }}
+    where dbt_valid_to is null
 
 ),
 

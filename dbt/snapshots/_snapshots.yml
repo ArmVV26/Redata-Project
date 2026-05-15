@@ -1,7 +1,7 @@
 version: 2
 
 snapshots:
-  - name: ref_price_component_snapshot
+  - name: ref_price_component_check_snp
 
     description: >
       Snapshot tipo check de la tabla de referencia ref_price_component.

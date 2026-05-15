@@ -46,7 +46,8 @@ ref_technology as (
     select
         technology_id,
         technology_name
-    from {{ ref('ref_technology') }}
+    from {{ ref('ref_technology_check_snp') }}
+    where dbt_valid_to is null
 
 ),
 
