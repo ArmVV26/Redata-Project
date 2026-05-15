@@ -20,7 +20,7 @@ src_regions as (
 renamed_casted as (
 
     select
-        geo_id::varchar          as region_id,
+        geo_id::integer          as region_id,
         geo_name::varchar        as region_name,
         geo_type::varchar        as region_type
     from src_regions

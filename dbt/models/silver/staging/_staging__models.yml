@@ -29,7 +29,7 @@ models:
 
       - name: geo_id
         description: Identificador geográfico de la zona consultada.
-        data_type: varchar
+        data_type: integer
         data_tests:
           - not_null
 
