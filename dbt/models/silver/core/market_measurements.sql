@@ -47,8 +47,7 @@ ref_price_component as (
         component_id,
         component_name,
         group_name
-    from {{ ref('ref_price_component_check_snp') }}
-    where dbt_valid_to is null
+    from {{ ref('ref_price_component') }}
 
 ),
 
