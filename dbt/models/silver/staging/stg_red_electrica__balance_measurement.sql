@@ -27,13 +27,14 @@ flattened_json as (
         s.endpoint_name,
         s.geo_id,
         s.time_trunc,
-        cont.value:id::varchar                      as technology_id,
-        cont.value:attributes:title::varchar        as technology_name,
-        inc.value:attributes:title::varchar         as energy_group,
-        cont.value:attributes:composite::boolean    as is_composite,
-        val.value:datetime::varchar                 as datetime_str,
-        val.value:value::varchar                    as value_mwh,
-        val.value:percentage::varchar               as percentage
+        cont.value:id::varchar                          as balance_item_id,
+        cont.value:attributes:description::varchar      as redata_technology_id,
+        cont.value:attributes:title::varchar            as technology_name,
+        inc.value:attributes:title::varchar             as energy_group,
+        cont.value:attributes:composite::boolean        as is_composite,
+        val.value:datetime::varchar                     as datetime_str,
+        val.value:value::varchar                        as value_mwh,
+        val.value:percentage::varchar                   as percentage
     from src_balance_measurement s,
         lateral flatten(input => s.raw_json:included) inc,
         lateral flatten(input => inc.value:attributes:content) cont,
@@ -44,18 +45,19 @@ flattened_json as (
 renamed_casted as (
     
     select
-        request_id::varchar                             as request_id,
-        loaded_at::timestamp_ntz                        as loaded_at,
-        endpoint_name::varchar                          as endpoint_name,
-        geo_id::integer                                 as geo_id,
-        {{ clean_text('time_trunc') }}::varchar         as time_trunc,
-        technology_id::varchar                          as technology_id,
-        {{ clean_text('technology_name') }}::varchar    as technology_name,
-        {{ clean_text('energy_group') }}::varchar       as energy_group,
-        is_composite::boolean                           as is_composite,
-        try_to_timestamp_ntz(datetime_str)              as datetime_ree,
-        try_to_double(value_mwh)                        as value_mwh,
-        try_to_double(percentage)                       as source_percentage
+        request_id::varchar                                 as request_id,
+        loaded_at::timestamp_ntz                            as loaded_at,
+        endpoint_name::varchar                              as endpoint_name,
+        geo_id::integer                                     as geo_id,
+        {{ clean_text('time_trunc') }}::varchar             as time_trunc,
+        balance_item_id::varchar                            as balance_item_id,
+        try_to_number(redata_technology_id)                 as redata_technology_id,
+        {{ clean_text('technology_name') }}::varchar        as technology_name,
+        {{ clean_text('energy_group') }}::varchar           as energy_group,
+        is_composite::boolean                               as is_composite,
+        try_to_timestamp_ntz(datetime_str)                  as datetime_ree,
+        try_to_double(value_mwh)                            as value_mwh,
+        try_to_double(percentage)                           as source_percentage
     from flattened_json
 
 )
@@ -66,7 +68,8 @@ select
     endpoint_name,
     geo_id,
     time_trunc,
-    technology_id,
+    balance_item_id,
+    redata_technology_id,
     technology_name,
     energy_group,
     is_composite,

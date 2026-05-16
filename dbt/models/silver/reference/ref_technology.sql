@@ -10,7 +10,7 @@ with
 src_balance as (
 
     select
-        technology_id,
+        redata_technology_id,
         technology_name,
         energy_group,
         is_composite
@@ -21,7 +21,7 @@ src_balance as (
 src_generation as (
 
     select
-        technology_id,
+        redata_technology_id,
         technology_name,
         energy_group,
         is_composite
@@ -32,14 +32,14 @@ src_generation as (
 union_technology as (
 
     select
-        technology_id,
+        redata_technology_id,
         technology_name,
         energy_group,
         is_composite
     from src_balance
     union
     select
-        technology_id,
+        redata_technology_id,
         technology_name,
         energy_group,
         is_composite
@@ -50,12 +50,13 @@ union_technology as (
 technology_deduplicado as (
 
     select
+        redata_technology_id,
         technology_name,
         energy_group,
-        is_composite,
-        min(technology_id)      as technology_id
+        is_composite
     from union_technology
     group by
+        redata_technology_id,
         technology_name,
         energy_group,
         is_composite
@@ -78,7 +79,7 @@ renamed_casted as (
             't.technology_name',
             'e.energy_category_id'
         ]) }}                                           as technology_id,
-        t.technology_id::varchar                        as redata_technology_id,
+        t.redata_technology_id::integer                 as redata_technology_id,
         t.technology_name::varchar                      as technology_name,
         e.energy_category_id::varchar                   as energy_category_id,
         t.is_composite::boolean                         as is_composite

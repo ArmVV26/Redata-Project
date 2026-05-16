@@ -26,7 +26,9 @@ stg_balance as (
         loaded_at,
         geo_id,
         time_trunc,
+        redata_technology_id,
         technology_name,
+        energy_group,
         datetime_ree,
         value_mwh,
         source_percentage
@@ -45,7 +47,9 @@ ref_technology as (
 
     select
         technology_id,
-        technology_name
+        redata_technology_id,
+        technology_name,
+        energy_category_id
     from {{ ref('ref_technology') }}
 
 ),
@@ -56,6 +60,15 @@ ref_regions as (
         region_id,
         region_name
     from {{ ref('ref_regions') }}
+
+),
+
+ref_energy_category as (
+
+    select
+        energy_category_id,
+        energy_category_name
+    from {{ ref('ref_energy_category') }}
 
 ),
 
@@ -71,8 +84,18 @@ balance_joined as (
         b.value_mwh,
         b.source_percentage
     from stg_balance b
+    left join ref_energy_category e
+        on b.energy_group = e.energy_category_name
     left join ref_technology t
         on b.technology_name = t.technology_name
+        and e.energy_category_id = t.energy_category_id
+        and ( 
+                b.redata_technology_id = t.redata_technology_id 
+                or (
+                    b.redata_technology_id is null
+                    and t.redata_technology_id is null
+                )
+            )
     left join ref_regions r
         on b.geo_id = r.region_id
 
