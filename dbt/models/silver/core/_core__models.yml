@@ -31,7 +31,7 @@ models:
 
       - name: region_id
         description: FK hacia region.region_id
-        data_type: varchar
+        data_type: integer
         data_tests:
           - not_null
           - relationships:

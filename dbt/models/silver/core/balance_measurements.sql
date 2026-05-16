@@ -115,7 +115,7 @@ renamed_casted as (
             'datetime_ree'
         ]) }}                                       as balance_id,
         technology_id::varchar                      as technology_id,
-        region_id::varchar                          as region_id,
+        region_id::integer                          as region_id,
         time_trunc::varchar                         as time_trunc,
         datetime_ree::timestamp_ntz                 as datetime_ree,
         value_mwh::float                            as value_mwh,

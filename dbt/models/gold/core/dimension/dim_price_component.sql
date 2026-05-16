@@ -8,7 +8,8 @@ src_price_component as (
         component_name,
         group_name,
         is_composite
-    from {{ ref('ref_price_component') }}
+    from {{ ref('ref_price_component_check_snp') }}
+    where dbt_valid_to is null
 
 ),
 

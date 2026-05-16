@@ -8,7 +8,8 @@ src_technology as (
         technology_name,
         energy_category_id,
         is_composite
-    from {{ ref('ref_technology') }}
+    from {{ ref('ref_technology_check_snp') }}
+    where dbt_valid_to is null
 
 ),
 
@@ -25,12 +26,12 @@ src_energy_category as (
 renamed_casted as (
 
     select
-        t.technology_id::varchar                as technology_id,
-        t.technology_name::varchar              as technology_name,
-        t.redata_technology_id::varchar         as redata_technology_id,
-        e.energy_category_name::varchar         as energy_category_name,
-        e.is_renewable::boolean                 as is_renewable,
-        t.is_composite::boolean                 as is_composite
+        t.technology_id::varchar                        as technology_id,
+        t.technology_name::varchar                      as technology_name,
+        t.redata_technology_id::varchar                 as redata_technology_id,
+        e.energy_category_name::varchar                 as energy_category_name,
+        e.is_renewable::boolean                         as is_renewable,
+        t.is_composite::boolean                         as is_composite
     from src_technology t
     inner join src_energy_category e
         on t.energy_category_id = e.energy_category_id

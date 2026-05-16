@@ -95,7 +95,7 @@ models:
     columns:
       - name: region_id
         description: Identificador geográfico de REData.
-        data_type: varchar
+        data_type: integer
         data_tests:
           - unique
           - not_null

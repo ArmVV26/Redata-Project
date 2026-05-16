@@ -47,7 +47,7 @@ renamed_casted as (
         request_id::varchar                             as request_id,
         loaded_at::timestamp_ntz                        as loaded_at,
         endpoint_name::varchar                          as endpoint_name,
-        geo_id::varchar                                 as geo_id,
+        geo_id::integer                                 as geo_id,
         {{ clean_text('time_trunc') }}::varchar         as time_trunc,
         technology_id::varchar                          as technology_id,
         {{ clean_text('technology_name') }}::varchar    as technology_name,

@@ -1,7 +1,7 @@
 version: 2
 
 snapshots:
-  - name: ref_price_component_snapshot
+  - name: ref_price_component_check_snp
 
     description: >
       Snapshot tipo check de la tabla de referencia ref_price_component.
@@ -81,7 +81,7 @@ snapshots:
       Snapshot tipo check de la tabla de referencia ref_technology.
       Conserva el histórico de cambios de las tecnologías eléctricas de REData,
       usando redata_technology_id como clave estable de negocio y detectando cambios
-      en technology_name, energy_category_id e is_composite.
+      en redata_technology_id, technology_name, energy_category_id e is_composite.
 
     columns:
       - name: dbt_scd_id
@@ -149,6 +149,6 @@ snapshots:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns:
-              - redata_technology_id
+              - technology_id
               - dbt_valid_from
             severity: warn
