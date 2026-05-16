@@ -128,7 +128,7 @@ balance_deduplicado as (
 
 ),
 
-renamed_casted as (
+final as (
 
     select
         {{ dbt_utils.generate_surrogate_key([
@@ -136,15 +136,15 @@ renamed_casted as (
             'region_id',
             'time_trunc',
             'datetime_ree'
-        ]) }}                                       as balance_id,
-        technology_id::varchar                      as technology_id,
-        region_id::integer                          as region_id,
-        time_trunc::varchar                         as time_trunc,
-        datetime_ree::timestamp_ntz                 as datetime_ree,
-        value_mwh::float                            as value_mwh,
-        source_percentage::float                    as source_percentage,
-        request_id::varchar                         as request_id,
-        loaded_at::timestamp_ntz                    as loaded_at
+        ]) }}                               as balance_id,
+        technology_id,
+        region_id,
+        time_trunc,
+        datetime_ree,
+        value_mwh,
+        source_percentage,
+        request_id,
+        loaded_at
     from balance_deduplicado
     where ranking = 1
         and technology_id is not null
@@ -162,4 +162,4 @@ select
     source_percentage,
     request_id,
     loaded_at
-from renamed_casted
+from final

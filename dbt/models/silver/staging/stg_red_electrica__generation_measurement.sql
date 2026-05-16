@@ -1,7 +1,7 @@
 /*
     Staging de generacion REData.
     Aplana RAW_JSON desde BRONZE.RAW.GENERATION_RESPONSE.
-    Granularidad: request_id + techonology_id + time_trunc + datetime_ree
+    Granularidad: request_id + redata_technology_id + time_trunc + datetime_ree
 */
 
 with

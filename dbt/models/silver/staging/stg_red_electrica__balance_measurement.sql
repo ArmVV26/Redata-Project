@@ -1,7 +1,7 @@
 /*
     Staging de balance REData.
     Aplana RAW_JSON desde BRONZE.RAW.BALANCE_RESPONSE.
-    Granularidad: request_id + geo_id + techonology_id + time_trunc + datetime_ree
+    Granularidad: request_id + geo_id + balance_item_id + time_trunc + datetime_ree
 */
 
 with

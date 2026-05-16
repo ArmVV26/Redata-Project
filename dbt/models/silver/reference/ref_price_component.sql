@@ -2,7 +2,7 @@
     Construye la tabla de referencia de componentes de precio a partir del nombre 
     del grupo del componente de presente en el modelo staging market.
     Granularidad: component_name
-    Clave: component_id, generada a partir de component_name. 
+    Clave: component_id, generada a partir de component_name y group_name. 
 */
 
 with
