@@ -93,21 +93,21 @@ market_deduplicado as (
 
 ),
 
-renamed_casted as (
+final as (
 
     select
         {{ dbt_utils.generate_surrogate_key([
             'component_id',
             'time_trunc',
             'datetime_ree'
-        ]) }}                                       as market_id,
-        component_id::varchar                       as component_id,
-        time_trunc::varchar                         as time_trunc,
-        datetime_ree::timestamp_ntz                 as datetime_ree,
-        value_eur_mwh::float                        as value_eur_mwh,
-        source_percentage::float                    as source_percentage,
-        request_id::varchar                         as request_id,
-        loaded_at::timestamp_ntz                    as loaded_at
+        ]) }}                               as market_id,
+        component_id,
+        time_trunc,
+        datetime_ree,
+        value_eur_mwh,
+        source_percentage,
+        request_id,
+        loaded_at
     from market_deduplicado
     where ranking = 1
         and component_id is not null
@@ -123,4 +123,4 @@ select
     source_percentage,
     request_id,
     loaded_at
-from renamed_casted
+from final

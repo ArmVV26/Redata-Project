@@ -31,4 +31,3 @@ seeds:
           - accepted_values:
               arguments:
                 values: ['peninsular', 'canarias', 'baleares', 'ceuta', 'melilla', 'ccaa']
-                severity: warn

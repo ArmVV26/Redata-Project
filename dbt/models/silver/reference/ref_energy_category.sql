@@ -38,12 +38,12 @@ union_energy_group as (
 renamed_casted as (
 
     select
-        {{ dbt_utils.generate_surrogate_key(['energy_group']) }}    as energy_category_id,
-        energy_group::varchar                                       as energy_category_name,
+        {{ dbt_utils.generate_surrogate_key(['energy_group']) }}        as energy_category_id,
+        energy_group::varchar                                           as energy_category_name,
         case
             when lower(trim(energy_group)) = 'renovable' then true
             else false
-        end::boolean                                                as is_renewable
+        end::boolean                                                    as is_renewable
     from union_energy_group
 
 )
