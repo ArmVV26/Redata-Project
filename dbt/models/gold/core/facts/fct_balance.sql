@@ -12,6 +12,7 @@ src_balance as (
         date_trunc('month', datetime_ree)::date     as month_start_date,
         value_mwh,
         source_percentage,
+        request_id,
         loaded_at
     from {{ ref('balance_measurements') }}
 
@@ -41,19 +42,21 @@ dim_region as (
 
 ),
 
-renamed_casted as (
+final as (
 
     select
-        b.balance_id::varchar                           as balance_id,
-        d.date_id::date                                 as date_id,
-        b.month_start_date::date                        as month_start_date,
-        r.region_id::integer                            as region_id,
-        t.technology_id::varchar                        as technology_id,
-        b.time_trunc::varchar                           as time_trunc,
-        b.datetime_ree::timestamp_ntz                   as datetime_ree,
-        b.value_mwh::float                              as balance_mwh,
-        b.source_percentage::float                      as balance_percentage,
-        b.loaded_at::timestamp_ntz                      as loaded_at
+        b.balance_id,
+        d.date_id,
+        b.month_start_date,
+        r.region_id,
+        t.technology_id,
+        b.time_trunc,
+        b.datetime_ree,
+        b.value_mwh                                     as balance_mwh,
+        b.source_percentage::float                      as balance_share,
+        {{ to_percentage('b.source_percentage') }}      as balance_share_pct,
+        b.request_id,
+        b.loaded_at
     from src_balance b
     inner join dim_date d
         on b.date_id = d.date_id
@@ -73,6 +76,8 @@ select
     time_trunc,
     datetime_ree,
     balance_mwh,
-    balance_percentage,
+    balance_share,
+    balance_share_pct,
+    request_id,
     loaded_at
-from renamed_casted
+from final

@@ -119,7 +119,7 @@ snapshots:
         description: >
           ID original de la tecnología tal como viene de la API de REData.
           Se usa como unique_key del snapshot.
-        data_type: varchar
+        data_type: integer
         data_tests:
           - not_null
 
