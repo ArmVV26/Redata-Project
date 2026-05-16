@@ -50,14 +50,12 @@ union_technology as (
 technology_deduplicado as (
 
     select
-        redata_technology_id,
         technology_name,
         energy_group,
         is_composite,
         min(redata_technology_id) as redata_technology_id
     from union_technology
     group by
-        redata_technology_id,
         technology_name,
         energy_group,
         is_composite
