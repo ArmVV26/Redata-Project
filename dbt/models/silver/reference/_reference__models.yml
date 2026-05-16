@@ -23,6 +23,7 @@ models:
         description: Nombre del grupo energético tal como viene de la API de REData.
         data_type: varchar
         data_tests:
+          - unique
           - not_null
 
       - name: is_renewable
@@ -83,7 +84,6 @@ models:
             combination_of_columns:
               - component_name
               - group_name
-            severity: warn
 
   - name: ref_regions
 
@@ -114,7 +114,6 @@ models:
           - accepted_values:
               arguments: 
                 values: ['peninsular', 'canarias', 'baleares', 'ceuta', 'melilla', 'ccaa']
-                severity: warn
 
   - name: ref_technology
 
@@ -168,4 +167,3 @@ models:
             combination_of_columns:
               - technology_name
               - energy_category_id
-            severity: warn

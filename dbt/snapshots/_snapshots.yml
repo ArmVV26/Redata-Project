@@ -80,7 +80,7 @@ snapshots:
     description: >
       Snapshot tipo check de la tabla de referencia ref_technology.
       Conserva el histórico de cambios de las tecnologías eléctricas de REData,
-      usando redata_technology_id como clave estable de negocio y detectando cambios
+      usando technology_id como clave estable de negocio y detectando cambios
       en redata_technology_id, technology_name, energy_category_id e is_composite.
 
     columns:

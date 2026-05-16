@@ -24,8 +24,6 @@ models:
       - name: endpoint_name
         description: Nombre lógico del endpoint REData consultado.
         data_type: varchar
-        data_tests:
-          - not_null
 
       - name: geo_id
         description: Identificador geográfico de la zona consultada.
@@ -132,8 +130,6 @@ models:
       - name: endpoint_name
         description: Nombre lógico del endpoint REData consultado.
         data_type: varchar
-        data_tests:
-          - not_null
 
       - name: time_trunc
         description: Granularidad temporal de la consulta.
@@ -229,8 +225,6 @@ models:
       - name: endpoint_name
         description: Nombre lógico del endpoint REData consultado.
         data_type: varchar
-        data_tests:
-          - not_null
 
       - name: time_trunc
         description: Granularidad temporal de la consulta.
