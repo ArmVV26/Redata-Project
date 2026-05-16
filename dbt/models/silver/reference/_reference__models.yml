@@ -40,7 +40,7 @@ models:
       Tabla de referencia de componentes del precio de la electricidad de REData.
       Construida a partir de los valores distintos del campo 'component_name' de
       stg_market_measurement.
-      'component_id' es un surrogate generado sobre 'component_name'
+      'component_id' es un surrogate generado sobre 'component_name' y 'group_name'.
   
     columns:
       - name: component_id
@@ -121,7 +121,7 @@ models:
       Tabla de referencia de tecnologías de generación eléctrica según REData.
       Construida a partir de los valores distintos del campo 'technology_name' de 
       stg_balance_measurement y stg_generation_measurement.
-      'technology_id' es un surrogate generado sobre 'technology_name'.
+      'technology_id' es un surrogate generado sobre 'technology_name' y 'energy_category_id'.
   
     columns:
       - name: technology_id

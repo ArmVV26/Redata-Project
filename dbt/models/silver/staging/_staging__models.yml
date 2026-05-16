@@ -6,7 +6,7 @@ models:
     description: >
       Staging de mediciones de balance/balance-electrico. Aplana los registros de 
       RAW_JSON de BALANCE_RESPONSE, renombra y castea tipos.
-      Granularidad: request_id + geo_id + redata_technology_id + time_trunc + datetime_ree
+      Granularidad: request_id + geo_id + balance_item_id + time_trunc + datetime_ree
 
     columns:
       - name: request_id
