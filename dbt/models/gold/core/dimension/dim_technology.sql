@@ -1,3 +1,21 @@
+/*
+    =======================================================================
+    dim_technology
+    -----------------------------------------------------------------------
+    Dimension de tecnologias electricas.
+
+    Capa: Gold / Core
+    Origen: ref_technology_check_snp
+            ref_energy_category
+    Materialización: table
+    Granularidad: technology_id
+    Clave: technology_id.
+
+    Expone el catalogo vigente de tecnologias electricas enriquecido con su
+    categoria energetica y el indicador de renovable.
+    =======================================================================
+*/
+
 with
 
 src_technology as (
@@ -33,6 +51,8 @@ final as (
         e.is_renewable,
         t.is_composite
     from src_technology t
+    
+    -- Añade la categoria energetica y el flag renovable para analisis
     inner join src_energy_category e
         on t.energy_category_id = e.energy_category_id
 

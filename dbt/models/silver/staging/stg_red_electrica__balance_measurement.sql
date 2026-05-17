@@ -1,7 +1,17 @@
 /*
-    Staging de balance REData.
-    Aplana RAW_JSON desde BRONZE.RAW.BALANCE_RESPONSE.
+    =======================================================================
+    stg_red_electrica__balance_measurement
+    -----------------------------------------------------------------------
+    Modelo staging de mediciones de balance electrico de REData.
+
+    Capa: Silver / Staging
+    Origen: source('redata_raw', 'balance_response')
+    Materialización: view
     Granularidad: request_id + geo_id + balance_item_id + time_trunc + datetime_ree
+
+    Aplana la respuesta JSON de balance electrico, conservando la region,
+    tecnologia, grupo energetico y valores temporales.
+    =======================================================================
 */
 
 with
@@ -36,8 +46,12 @@ flattened_json as (
         val.value:value::varchar                        as value_mwh,
         val.value:percentage::varchar                   as percentage
     from src_balance_measurement s,
+
+        -- Desanida los bloques principales de la respuesta de REData
         lateral flatten(input => s.raw_json:included) inc,
+        -- Cada bloque puede contener varios componentes de balance electrico
         lateral flatten(input => inc.value:attributes:content) cont,
+        -- Cada componente contiene una serie temporal de valores
         lateral flatten(input => cont.value:attributes:values) val
 
 ),
@@ -45,15 +59,22 @@ flattened_json as (
 renamed_casted as (
     
     select
+        -- Campos de trazabilidad de la ingesta
         request_id::varchar                                 as request_id,
         loaded_at::timestamp_ntz                            as loaded_at,
         endpoint_name::varchar                              as endpoint_name,
+
+        -- Ambito geografico original de REData
         geo_id::integer                                     as geo_id,
+
+        -- Normalizacion de atributos descriptivos
         {{ clean_text('time_trunc') }}::varchar             as time_trunc,
         balance_item_id::varchar                            as balance_item_id,
         try_to_number(redata_technology_id)                 as redata_technology_id,
         {{ clean_text('technology_name') }}::varchar        as technology_name,
         {{ clean_text('energy_group') }}::varchar           as energy_group,
+
+        -- Campos propios de la medicion
         is_composite::boolean                               as is_composite,
         try_to_timestamp_ntz(datetime_str)                  as datetime_ree,
         try_to_double(value_mwh)                            as value_mwh,

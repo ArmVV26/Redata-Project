@@ -1,3 +1,23 @@
+/*
+    =======================================================================
+    fct_balance
+    -----------------------------------------------------------------------
+    Fact de mediciones de balance electrico.
+
+    Capa: Gold / Core
+    Origen: balance_measurements
+            dim_date
+            dim_technology
+            dim_region
+    Materialización: table
+    Granularidad: balance_id
+    Clave: balance_id.
+
+    Expone las mediciones de balance electrico por region, tecnologia y fecha,
+    lista para analisis y consumo desde marts o herramientas de visualizacion.
+    =======================================================================
+*/
+
 with
 
 src_balance as (
@@ -7,9 +27,12 @@ src_balance as (
         technology_id,
         region_id,
         time_trunc,
+
+        -- Claves temporales derivadas para facilitar joins y analisis mensual
         datetime_ree,
         datetime_ree::date                          as date_id,
         date_trunc('month', datetime_ree)::date     as month_start_date,
+
         value_mwh,
         source_percentage,
         request_id,
@@ -53,8 +76,12 @@ final as (
         b.time_trunc,
         b.datetime_ree,
         b.value_mwh                                     as balance_mwh,
+
+        -- Metrica original y version expresada en porcentaje
         b.source_percentage::float                      as balance_share,
         {{ to_percentage('b.source_percentage') }}      as balance_share_pct,
+
+        -- Campos de trazabilidad de la medicion cargada
         b.request_id,
         b.loaded_at
     from src_balance b

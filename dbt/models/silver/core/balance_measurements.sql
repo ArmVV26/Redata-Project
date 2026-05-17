@@ -8,13 +8,26 @@
 }}
 
 /*
-    Construye la tabla core de mediciones de balance eléctrico a partir de
-    stg_balance_measurement y las referencias de tecnología y región.
+    =======================================================================
+    balance_measurements
+    -----------------------------------------------------------------------
+    Modelo core de mediciones de balance electrico.
+
+    Capa: Silver / Core
+    Origen: stg_red_electrica__balance_measurement
+            ref_technology
+            ref_energy_category
+            ref_regions
+    Materialización: incremental
+    Estrategia incremental: merge
     Granularidad: technology_id + region_id + time_trunc + datetime_ree
     Clave: balance_id, generada a partir de technology_id, region_id, 
     time_trunc y datetime_ree.
 
-    Mantiene la última carga disponible por medición usando loaded_at.
+    Normaliza las mediciones de balance electrico relacionandolas con una
+    tecnologia y una region analitica, manteniendo una unica version
+    vigente por medicion.
+    =======================================================================
 */
 
 with
@@ -35,6 +48,7 @@ stg_balance as (
     from {{ ref('stg_red_electrica__balance_measurement') }}
 
     {% if is_incremental() %}
+        -- En ejecuciones incrementales solo procesa cargas nuevas o actualizadas
         where loaded_at >= (
             select coalesce(max(loaded_at), '1900-01-01'::timestamp_ntz)
             from {{ this }}
@@ -85,8 +99,11 @@ balance_joined as (
         b.source_percentage
     from stg_balance b
     left join ref_energy_category e
+        -- Primero se resuelve la categoria energetica para poder usarla en la clave de tecnologia
         on b.energy_group = e.energy_category_name
     left join ref_technology t
+        -- La tecnologia se verifica usando nombre, categoria y redata_technology_id
+        -- Se contempla el caso de identificadores nulos para no perder tecnologias validas
         on b.technology_name = t.technology_name
         and e.energy_category_id = t.energy_category_id
         and ( 
@@ -97,6 +114,7 @@ balance_joined as (
                 )
             )
     left join ref_regions r
+        -- Relaciona el geo_id original con la referencia geografica normalizada
         on b.geo_id = r.region_id
 
 ),
@@ -112,6 +130,8 @@ balance_deduplicado as (
         datetime_ree,
         value_mwh,
         source_percentage,
+
+        -- Ranking usado para conservar la ultima carga disponible por medicion
         {{ deduplicate_by_latest(
             partition_by=[
                 'technology_id',
@@ -131,6 +151,7 @@ balance_deduplicado as (
 final as (
 
     select
+        -- Clave surrogate estable para analisis, independiente del endpoint de origen
         {{ dbt_utils.generate_surrogate_key([
             'technology_id',
             'region_id',
@@ -147,6 +168,7 @@ final as (
         loaded_at
     from balance_deduplicado
     where ranking = 1
+        -- Se descartan mediciones que no hayan podido mapearse contra las referencias
         and technology_id is not null
         and region_id is not null
     

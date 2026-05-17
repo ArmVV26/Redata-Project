@@ -1,3 +1,20 @@
+/*
+    =======================================================================
+    dim_price_component
+    -----------------------------------------------------------------------
+    Dimension de componentes de precio electrico.
+
+    Capa: Gold / Core
+    Origen: ref_price_component_check_snp
+    Materialización: table
+    Granularidad: component_id
+    Clave: component_id.
+
+    Expone la version vigente del catalogo de componentes de precio para su 
+    uso en los hechos, marts y herramientas de visualizacion.
+    =======================================================================
+*/
+
 with
 
 src_price_component as (

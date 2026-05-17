@@ -8,13 +8,23 @@
 }}
 
 /*
-    Construye la tabla core de mediciones de componentes del precio de la 
-    electricidad a partir de stg_market_measurement y la referencia de price_component.
+    =======================================================================
+    market_measurements
+    -----------------------------------------------------------------------
+    Modelo core de mediciones de mercado electrico.
+
+    Capa: Silver / Core
+    Origen: stg_red_electrica__market_measurement
+            ref_price_component
+    Materialización: incremental
+    Estrategia incremental: merge
     Granularidad: component_id + time_trunc + datetime_ree
     Clave: market_id, generada a partir de component_id, time_trunc 
     y datetime_ree.
 
-    Mantiene la última carga disponible por medición usando loaded_at.
+    Relaciona las mediciones de mercado con su componente de precio analitico,
+    elimina duplicados de carga y conserva la ultima version disponible.
+    =======================================================================
 */
 
 with
@@ -33,6 +43,7 @@ stg_market as (
     from {{ ref('stg_red_electrica__market_measurement') }}
 
     {% if is_incremental() %}
+        -- En ejecuciones incrementales solo procesa cargas nuevas o actualizadas
         where loaded_at >= (
             select coalesce(max(loaded_at), '1900-01-01'::timestamp_ntz)
             from {{ this }}
@@ -78,6 +89,8 @@ market_deduplicado as (
         datetime_ree,
         value_eur_mwh,
         source_percentage,
+
+        -- Ranking usado para conservar la ultima carga disponible por medicion
         {{ deduplicate_by_latest(
             partition_by=[
                 'component_id',
@@ -96,6 +109,7 @@ market_deduplicado as (
 final as (
 
     select
+        -- Clave surrogate estable para analisis, independiente del endpoint de origen
         {{ dbt_utils.generate_surrogate_key([
             'component_id',
             'time_trunc',
@@ -110,6 +124,7 @@ final as (
         loaded_at
     from market_deduplicado
     where ranking = 1
+        -- Se descartan mediciones que no hayan podido mapearse contra la referencia
         and component_id is not null
     
 )

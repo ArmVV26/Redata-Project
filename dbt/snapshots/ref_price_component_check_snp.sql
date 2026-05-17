@@ -1,8 +1,19 @@
 /*
-    Snapshot de componentes de precio de REData.
-    Detecta cambios en el nombre, grupo o flag de componente compuesto.
+    =======================================================================
+    ref_price_component_check_snp
+    -----------------------------------------------------------------------
+    Snapshot de componentes de precio electronico.
+
+    Capa: Snapshots
+    Origen: ref_price_component
+    Materialización: table
+    Estrategia: check
     Granularidad: redata_component_id
-    Clave: redata_component_id
+    Clave: redata_component_id.
+
+    Se encarga de conservar el historico de cambios del catalogo de componentes
+    de precio publicado por REData.
+    =======================================================================
 */
 
 {% snapshot ref_price_component_check_snp %}
