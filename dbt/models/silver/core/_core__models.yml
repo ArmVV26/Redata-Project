@@ -8,6 +8,10 @@ models:
       'balance_id' es un surrogate generado sobre: technology_id, region_id,
       time_trunc y datetime_ree.
       Granularidad: technology_id + region_id + time_trunc + datetime_ree
+    
+    config:
+      contract: 
+        enforced: true
   
     columns:
       - name: balance_id
@@ -15,6 +19,8 @@ models:
           Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
           'technology_id', 'geo_id', 'time_trunc' y 'datetime_ree'.
         data_type: varchar
+        constraints:
+          - type: not_null
         data_tests:
           - unique
           - not_null
@@ -22,6 +28,8 @@ models:
       - name: technology_id
         description: FK hacia technology.technology_id.
         data_type: varchar
+        constraints:
+          - type: not_null
         data_tests:
           - not_null
           - relationships:
@@ -31,7 +39,9 @@ models:
 
       - name: region_id
         description: FK hacia region.region_id
-        data_type: varchar
+        data_type: integer
+        constraints:
+          - type: not_null
         data_tests:
           - not_null
           - relationships:
@@ -47,7 +57,6 @@ models:
           - accepted_values:
               arguments: 
                 values: ['hour', 'day', 'month', 'year']
-                severity: warn
 
       - name: datetime_ree
         description: Timestamp de la medición, renombrado desde 'datetime_ree'.
@@ -84,6 +93,15 @@ models:
         data_tests:
           - not_null
 
+    data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns:
+            - technology_id
+            - region_id
+            - time_trunc
+            - datetime_ree
+
   - name: generation_measurements
 
     description: >
@@ -91,6 +109,10 @@ models:
       'generation_id' es un surrogate generado sobre: technology_id, time_trunc 
       y datetime_ree.
       Granularidad: technology_id + time_trunc + datetime_ree
+
+    config: 
+      contract: 
+        enforced: true
   
     columns:
       - name: generation_id
@@ -98,6 +120,8 @@ models:
           Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
           'technology_id', 'time_trunc' y 'datetime_ree'.
         data_type: varchar
+        constraints:
+          - type: not_null
         data_tests:
           - unique
           - not_null
@@ -105,6 +129,8 @@ models:
       - name: technology_id
         description: FK hacia technology.technology_id.
         data_type: varchar
+        constraints:
+          - type: not_null
         data_tests:
           - not_null
           - relationships:
@@ -120,7 +146,6 @@ models:
           - accepted_values:
               arguments: 
                 values: ['hour', 'day', 'month', 'year']
-                severity: warn
 
       - name: datetime_ree
         description: Timestamp de la medición, renombrado desde 'datetime_ree'.
@@ -157,6 +182,14 @@ models:
         data_tests:
           - not_null
 
+    data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns:
+            - technology_id
+            - time_trunc
+            - datetime_ree
+
   - name: market_measurements
 
     description: >
@@ -164,6 +197,10 @@ models:
       'market_id' es un surrogate generado sobre: component_id, time_trunc 
       y datetime_ree.
       Granularidad: component_id + time_trunc + datetime_ree
+    
+    config: 
+      contract: 
+        enforced: true
   
     columns:
       - name: market_id
@@ -171,6 +208,8 @@ models:
           Clave surrogate generada con dbt_utils.generate_surrogate_key sobre
           'component_id', 'time_trunc' y 'datetime_ree'.
         data_type: varchar
+        constraints:
+          - type: not_null
         data_tests:
           - unique
           - not_null
@@ -178,6 +217,8 @@ models:
       - name: component_id
         description: FK hacia price_component.component_id.
         data_type: varchar
+        constraints:
+          - type: not_null
         data_tests:
           - not_null
           - relationships:
@@ -193,7 +234,6 @@ models:
           - accepted_values:
               arguments: 
                 values: ['hour', 'day', 'month', 'year']
-                severity: warn
 
       - name: datetime_ree
         description: Timestamp de la medición, renombrado desde 'datetime_ree'.
@@ -229,3 +269,11 @@ models:
         data_type: timestamp_ntz
         data_tests:
           - not_null
+    
+    data_tests:
+    - dbt_utils.unique_combination_of_columns:
+        arguments:
+          combination_of_columns:
+            - component_id
+            - time_trunc
+            - datetime_ree

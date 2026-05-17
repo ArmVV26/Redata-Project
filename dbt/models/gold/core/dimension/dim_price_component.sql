@@ -8,19 +8,8 @@ src_price_component as (
         component_name,
         group_name,
         is_composite
-    from {{ ref('ref_price_component') }}
-
-),
-
-renamed_casted as (
-
-    select
-        component_id::varchar               as component_id,
-        redata_component_id::varchar        as redata_component_id,
-        component_name::varchar             as component_name,
-        group_name::varchar                 as group_name,
-        is_composite::boolean               as is_composite
-    from src_price_component
+    from {{ ref('ref_price_component_check_snp') }}
+    where dbt_valid_to is null
 
 )
 
@@ -30,4 +19,4 @@ select
     component_name,
     group_name,
     is_composite
-from renamed_casted
+from src_price_component

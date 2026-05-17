@@ -23,6 +23,7 @@ models:
         description: Nombre del grupo energético tal como viene de la API de REData.
         data_type: varchar
         data_tests:
+          - unique
           - not_null
 
       - name: is_renewable
@@ -39,7 +40,7 @@ models:
       Tabla de referencia de componentes del precio de la electricidad de REData.
       Construida a partir de los valores distintos del campo 'component_name' de
       stg_market_measurement.
-      'component_id' es un surrogate generado sobre 'component_name'
+      'component_id' es un surrogate generado sobre 'component_name' y 'group_name'.
   
     columns:
       - name: component_id
@@ -83,7 +84,6 @@ models:
             combination_of_columns:
               - component_name
               - group_name
-            severity: warn
 
   - name: ref_regions
 
@@ -95,7 +95,7 @@ models:
     columns:
       - name: region_id
         description: Identificador geográfico de REData.
-        data_type: varchar
+        data_type: integer
         data_tests:
           - unique
           - not_null
@@ -114,7 +114,6 @@ models:
           - accepted_values:
               arguments: 
                 values: ['peninsular', 'canarias', 'baleares', 'ceuta', 'melilla', 'ccaa']
-                severity: warn
 
   - name: ref_technology
 
@@ -122,7 +121,7 @@ models:
       Tabla de referencia de tecnologías de generación eléctrica según REData.
       Construida a partir de los valores distintos del campo 'technology_name' de 
       stg_balance_measurement y stg_generation_measurement.
-      'technology_id' es un surrogate generado sobre 'technology_name'.
+      'technology_id' es un surrogate generado sobre 'technology_name' y 'energy_category_id'.
   
     columns:
       - name: technology_id
@@ -138,9 +137,7 @@ models:
         description: >
           ID original de la tecnología tal como viene de la API de REData.
           Se conserva como trazabilidad pero no se usa como clave.
-        data_type: varchar
-        data_tests:
-          - not_null
+        data_type: integer
 
       - name: technology_name
         description: Nombre de la tecnología tal como viene de REData.
@@ -170,4 +167,3 @@ models:
             combination_of_columns:
               - technology_name
               - energy_category_id
-            severity: warn

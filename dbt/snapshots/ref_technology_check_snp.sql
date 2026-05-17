@@ -1,19 +1,19 @@
 /*
     Snapshot de tecnologías eléctricas de REData.
     Detecta cambios en el nombre, categoría energética o flag de tecnología compuesta.
-    Granularidad: redata_technology_id
-    Clave: redata_technology_id
+    Granularidad: technology_id
+    Clave: technology_id
 */
 
 {% snapshot ref_technology_check_snp %}
 
 {{
     config(
-        target_database=env_var('DBT_ENVIRONMENTS', 'FAIL') ~ '_REDATA_SILVER',
         target_schema='snapshots',
-        unique_key='redata_technology_id',
+        unique_key='technology_id',
         strategy='check',
         check_cols=[
+            'redata_technology_id',
             'technology_name',
             'energy_category_id',
             'is_composite'

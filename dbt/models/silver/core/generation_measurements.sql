@@ -25,6 +25,7 @@ stg_generation as (
         request_id,
         loaded_at,
         time_trunc,
+        redata_technology_id,
         technology_name,
         energy_group,
         datetime_ree,
@@ -45,9 +46,19 @@ ref_technology as (
 
     select
         technology_id,
+        redata_technology_id,
         technology_name,
         energy_category_id
     from {{ ref('ref_technology') }}
+
+),
+
+ref_energy_category as (
+
+    select
+        energy_category_id,
+        energy_category_name
+    from {{ ref('ref_energy_category') }}
 
 ),
 
@@ -62,11 +73,18 @@ generation_joined as (
         g.value_mwh,
         g.source_percentage
     from stg_generation g
-    left join {{ ref('ref_energy_category') }} e
+    left join ref_energy_category e
         on g.energy_group = e.energy_category_name
     left join ref_technology t
         on g.technology_name = t.technology_name
         and e.energy_category_id = t.energy_category_id
+        and ( 
+                g.redata_technology_id = t.redata_technology_id 
+                or (
+                    g.redata_technology_id is null
+                    and t.redata_technology_id is null
+                )
+            )
 
 ),
 
@@ -95,21 +113,21 @@ generation_deduplicado as (
 
 ),
 
-renamed_casted as (
+final as (
 
     select
         {{ dbt_utils.generate_surrogate_key([
             'technology_id',
             'time_trunc',
             'datetime_ree'
-        ]) }}                                       as generation_id,
-        technology_id::varchar                      as technology_id,
-        time_trunc::varchar                         as time_trunc,
-        datetime_ree::timestamp_ntz                 as datetime_ree,
-        value_mwh::float                            as value_mwh,
-        source_percentage::float                    as source_percentage,
-        request_id::varchar                         as request_id,
-        loaded_at::timestamp_ntz                    as loaded_at
+        ]) }}                               as generation_id,
+        technology_id,
+        time_trunc,
+        datetime_ree,
+        value_mwh,
+        source_percentage,
+        request_id,
+        loaded_at
     from generation_deduplicado
     where ranking = 1
         and technology_id is not null
@@ -125,4 +143,4 @@ select
     source_percentage,
     request_id,
     loaded_at
-from renamed_casted
+from final
