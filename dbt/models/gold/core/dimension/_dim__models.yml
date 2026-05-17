@@ -1,0 +1,246 @@
+version: 2
+
+models:
+  - name: dim_region
+    description: Dimensión de regiones y ámbitos geográficos de REData para el análisis territorial.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: region_id
+        description: Identificador geográfico de REData usado como clave de región.
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('ref_regions')
+                field: region_id
+
+      - name: region_name
+        description: Nombre descriptivo del ámbito geográfico.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: region_type
+        description: Tipo de ámbito geográfico según REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['peninsular', 'canarias', 'baleares', 'ceuta', 'melilla', 'ccaa']
+
+  - name: dim_date
+    description: Dimensión calendario para analizar las mediciones eléctricas por día, mes, trimestre y año.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: date_id
+        description: Fecha calendario usada como clave de la dimensión temporal.
+        data_type: date
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: year
+        description: Año de la fecha.
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: quarter
+        description: Trimestre del año.
+        data_type: integer
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 1
+                max_value: 4
+
+      - name: month_start_date
+        description: Primer día del mes correspondiente a la fecha.
+        data_type: date
+        data_tests:
+          - not_null
+
+      - name: month_number
+        description: Número de mes dentro del año.
+        data_type: integer
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 1
+                max_value: 12
+
+      - name: month_name
+        description: Nombre del mes.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: year_month
+        description: Identificador numérico del año y mes en formato YYYYMM.
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: day_of_month
+        description: Día del mes.
+        data_type: integer
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 1
+                max_value: 31
+
+      - name: day_of_week
+        description: Número del día de la semana según Snowflake.
+        data_type: integer
+        data_tests:
+          - not_null
+
+      - name: day_name
+        description: Nombre del día de la semana.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+  - name: dim_technology
+    description: Dimensión de tecnologías eléctricas de REData enriquecida con categoría energética.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: technology_id
+        description: Clave surrogate de la tecnología eléctrica.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('ref_technology_check_snp')
+                field: technology_id
+
+      - name: technology_name
+        description: Nombre descriptivo de la tecnología eléctrica.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: redata_technology_id
+        description: Identificador original de la tecnología en REData, conservado como trazabilidad.
+        data_type: integer
+
+      - name: energy_category_name
+        description: Categoría energética asociada a la tecnología.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Renovable', 'No-Renovable', 'Demanda', 'Almacenamiento', 'Generación total']
+                severity: warn
+
+      - name: is_renewable
+        description: Indica si la tecnología pertenece a una categoría renovable.
+        data_type: boolean
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+
+      - name: is_composite
+        description: Indica si la tecnología es un agregado compuesto.
+        data_type: boolean
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - technology_name
+              - energy_category_name
+
+  - name: dim_price_component
+    description: Dimensión de componentes del precio eléctrico de REData para el análisis de mercado.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: component_id
+        description: Clave surrogate del componente de precio.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('ref_price_component_check_snp')
+                field: component_id
+
+      - name: redata_component_id
+        description: Identificador original del componente de precio en REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: component_name
+        description: Nombre descriptivo del componente de precio.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: group_name
+        description: Grupo al que pertenece el componente de precio según REData.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Servicios-ajuste', 'Precio total', 'Energia', 'Mercados', 'Servicios-pagos']
+                severity: warn
+
+      - name: is_composite
+        description: Indica si el componente de precio es un agregado compuesto.
+        data_type: boolean
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true, false]
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - component_name
+              - group_name

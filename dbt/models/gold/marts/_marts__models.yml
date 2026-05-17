@@ -1,0 +1,289 @@
+version: 2
+
+models:
+  - name: monthly_generation_mix
+    description: Mart mensual del mix de generación eléctrica por tecnología no compuesta.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: monthly_generation_mix_id
+        description: Clave surrogate del mart mensual de mix de generación.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: month_start_date
+        description: Primer día del mes analizado.
+        data_type: date
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_id
+
+      - name: technology_id
+        description: FK hacia dim_technology.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_technology')
+                field: technology_id
+
+      - name: generation_mwh
+        description: Generación mensual de la tecnología no compuesta en MWh.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: total_generation_mwh
+        description: Generación total mensual en MWh calculada sobre tecnologías no compuestas.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: generation_share
+        description: Peso de la tecnología sobre la generación mensual total, en escala 0 a 1.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: generation_share_pct
+        description: Peso de la tecnología sobre la generación mensual total, en escala 0 a 100.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+                severity: warn
+
+      - name: loaded_at
+        description: Último timestamp de carga usado en la agregación mensual.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - month_start_date
+              - technology_id
+
+  - name: monthly_balance_region
+    description: Mart mensual de balance eléctrico por región y tecnología no compuesta.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: monthly_balance_region_id
+        description: Clave surrogate del mart mensual de balance regional.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: month_start_date
+        description: Primer día del mes analizado.
+        data_type: date
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_id
+
+      - name: region_id
+        description: FK hacia dim_region.
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_region')
+                field: region_id
+
+      - name: technology_id
+        description: FK hacia dim_technology.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_technology')
+                field: technology_id
+
+      - name: balance_mwh
+        description: Balance eléctrico mensual en MWh para la región y tecnología no compuesta.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: total_region_balance_mwh
+        description: Balance eléctrico mensual total de la región en MWh calculado sobre tecnologías no compuestas.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: region_balance_share
+        description: Peso de la tecnología sobre el balance mensual total de la región, en escala 0 a 1.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: region_balance_share_pct
+        description: Peso de la tecnología sobre el balance mensual total de la región, en escala 0 a 100.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+                severity: warn
+
+      - name: loaded_at
+        description: Último timestamp de carga usado en la agregación mensual.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - month_start_date
+              - region_id
+              - technology_id
+
+  - name: monthly_renewable_vs_price
+    description: Mart mensual de relación entre peso renovable y precio de mercado diario.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: monthly_renewable_vs_price_id
+        description: Clave surrogate del mart mensual de renovables frente a precio de mercado.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+
+      - name: month_start_date
+        description: Primer día del mes analizado.
+        data_type: date
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_id
+
+      - name: renewable_mwh
+        description: Generación renovable mensual en MWh calculada sobre tecnologías no compuestas.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: total_generation_mwh
+        description: Generación total mensual en MWh calculada sobre tecnologías no compuestas.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: renewable_share
+        description: Peso de la generación renovable sobre la generación mensual total, en escala 0 a 1.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: renewable_share_pct
+        description: Peso de la generación renovable sobre la generación mensual total, en escala 0 a 100.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+                severity: warn
+
+      - name: market_price_eur_mwh
+        description: Precio mensual de mercado en EUR/MWh calculado a partir del componente mercado diario.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: renewable_share_pct_mom_change
+        description: Variación mensual absoluta del peso renovable en puntos porcentuales.
+        data_type: float
+
+      - name: market_price_eur_mwh_mom_change
+        description: Variación mensual absoluta del precio de mercado en EUR/MWh.
+        data_type: float
+
+      - name: market_price_mom_change
+        description: Variación mensual relativa del precio de mercado, en escala 0 a 1.
+        data_type: float
+
+      - name: market_price_mom_change_pct
+        description: Variación mensual relativa del precio de mercado, en escala 0 a 100.
+        data_type: float
+
+      - name: generation_loaded_at
+        description: Último timestamp de carga usado para la agregación mensual de generación.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: market_loaded_at
+        description: Último timestamp de carga usado para la agregación mensual de mercado.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null

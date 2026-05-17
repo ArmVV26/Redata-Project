@@ -15,9 +15,10 @@ dates as (
 renamed_casted as (
 
     select
-        date_day                                    as date_id,
+        date_day::date                              as date_id,
         year(date_day)                              as year,
         quarter(date_day)                           as quarter,
+        date_trunc('month', date_day)::date         as month_start_date,
         month(date_day)                             as month_number,
         monthname(date_day)                         as month_name,
         year(date_day) * 100 + month(date_day)      as year_month,
@@ -32,6 +33,7 @@ select
     date_id,
     year,
     quarter,
+    month_start_date,
     month_number,
     month_name,
     year_month,

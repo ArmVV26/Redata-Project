@@ -11,6 +11,7 @@ src_generation as (
         date_trunc('month', datetime_ree)::date     as month_start_date,
         value_mwh,
         source_percentage,
+        request_id,
         loaded_at
     from {{ ref('generation_measurements') }}
 
@@ -32,18 +33,20 @@ dim_technology as (
 
 ),
 
-renamed_casted as (
+final as (
 
     select
-        g.generation_id::varchar                    as generation_id,
-        d.date_id::date                             as date_id,
-        g.month_start_date::date                    as month_start_date,
-        t.technology_id::varchar                    as technology_id,
-        g.time_trunc::varchar                       as time_trunc,
-        g.datetime_ree::timestamp_ntz               as datetime_ree,
-        g.value_mwh::float                          as generation_mwh,
-        g.source_percentage::float                  as generation_percentage,
-        g.loaded_at::timestamp_ntz                  as loaded_at
+        g.generation_id,
+        d.date_id,
+        g.month_start_date,
+        t.technology_id,
+        g.time_trunc,
+        g.datetime_ree,
+        g.value_mwh                                     as generation_mwh,
+        g.source_percentage                             as generation_share,
+        {{ to_percentage('g.source_percentage') }}      as generation_share_pct,
+        g.request_id,
+        g.loaded_at
     from src_generation g
     inner join dim_date d
         on g.date_id = d.date_id
@@ -60,6 +63,8 @@ select
     time_trunc,
     datetime_ree,
     generation_mwh,
-    generation_percentage,
+    generation_share,
+    generation_share_pct,
+    request_id,
     loaded_at
-from renamed_casted
+from final

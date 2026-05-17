@@ -1,0 +1,360 @@
+version: 2
+
+models:
+  - name: fct_balance
+    description: Hecho analítico de balance eléctrico por región, tecnología y periodo temporal.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: balance_id
+        description: Clave surrogate del hecho de balance eléctrico.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('balance_measurements')
+                field: balance_id
+
+      - name: date_id
+        description: FK hacia dim_date para analizar la medición por calendario.
+        data_type: date
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_id
+
+      - name: month_start_date
+        description: Primer día del mes de la medición.
+        data_type: date
+        data_tests:
+          - not_null
+
+      - name: region_id
+        description: FK hacia dim_region.
+        data_type: integer
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_region')
+                field: region_id
+
+      - name: technology_id
+        description: FK hacia dim_technology.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_technology')
+                field: technology_id
+
+      - name: time_trunc
+        description: Granularidad temporal de la medición.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['hour', 'day', 'month', 'year']
+
+      - name: datetime_ree
+        description: Timestamp de la medición publicado por REData.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: balance_mwh
+        description: Valor energético del balance eléctrico en MWh.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: balance_share
+        description: Proporción del total que representa la medición, en escala 0 a 1.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: balance_share_pct
+        description: Porcentaje del total que representa la medición, en escala 0 a 100.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+                severity: warn
+
+      - name: request_id
+        description: Trazabilidad hacia la petición de ingesta original.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: loaded_at
+        description: Timestamp de carga del registro de origen en Bronze.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - technology_id
+              - region_id
+              - time_trunc
+              - datetime_ree
+
+  - name: fct_generation
+    description: >
+      Hecho analítico de generación eléctrica por tecnología y periodo temporal.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: generation_id
+        description: Clave surrogate del hecho de generación eléctrica.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('generation_measurements')
+                field: generation_id
+
+      - name: date_id
+        description: FK hacia dim_date para analizar la medición por calendario.
+        data_type: date
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_id
+
+      - name: month_start_date
+        description: Primer día del mes de la medición.
+        data_type: date
+        data_tests:
+          - not_null
+
+      - name: technology_id
+        description: FK hacia dim_technology.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_technology')
+                field: technology_id
+
+      - name: time_trunc
+        description: Granularidad temporal de la medición.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['hour', 'day', 'month', 'year']
+
+      - name: datetime_ree
+        description: Timestamp de la medición publicado por REData.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: generation_mwh
+        description: Valor de generación eléctrica en MWh.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: generation_share
+        description: Proporción del total que representa la tecnología, en escala 0 a 1.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: generation_share_pct
+        description: Porcentaje del total que representa la tecnología, en escala 0 a 100.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+                severity: warn
+
+      - name: request_id
+        description: Trazabilidad hacia la petición de ingesta original.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: loaded_at
+        description: Timestamp de carga del registro de origen en Bronze.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - technology_id
+              - time_trunc
+              - datetime_ree
+
+
+  - name: fct_market
+    description: >
+      Hecho analítico de componentes del precio eléctrico por periodo temporal.
+
+    config:
+      contract:
+        enforced: true
+
+    columns:
+      - name: market_id
+        description: Clave surrogate del hecho de mercado eléctrico.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('market_measurements')
+                field: market_id
+
+      - name: date_id
+        description: FK hacia dim_date para analizar la medición por calendario.
+        data_type: date
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_id
+
+      - name: month_start_date
+        description: Primer día del mes de la medición.
+        data_type: date
+        data_tests:
+          - not_null
+
+      - name: component_id
+        description: FK hacia dim_price_component.
+        data_type: varchar
+        constraints:
+          - type: not_null
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_price_component')
+                field: component_id
+
+      - name: time_trunc
+        description: Granularidad temporal de la medición.
+        data_type: varchar
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['hour', 'day', 'month', 'year']
+
+      - name: datetime_ree
+        description: Timestamp de la medición publicado por REData.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+      - name: market_component_eur_mwh
+        description: Valor del componente de precio eléctrico en EUR/MWh.
+        data_type: float
+        data_tests:
+          - not_null
+
+      - name: market_share
+        description: Proporción del total que representa el componente de precio, en escala 0 a 1.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+                severity: warn
+
+      - name: market_share_pct
+        description: Porcentaje del total que representa el componente de precio, en escala 0 a 100.
+        data_type: float
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+                severity: warn
+
+      - name: request_id
+        description: Trazabilidad hacia la petición de ingesta original.
+        data_type: varchar
+        data_tests:
+          - not_null
+
+      - name: loaded_at
+        description: Timestamp de carga del registro de origen en Bronze.
+        data_type: timestamp_ntz
+        data_tests:
+          - not_null
+
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - component_id
+              - time_trunc
+              - datetime_ree
