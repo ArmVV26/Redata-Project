@@ -1,8 +1,18 @@
 /*
-    Construye la tabla de referencia de ámbitos geográficos a parir del 
-    seed de regions.
+    =======================================================================
+    ref_regions
+    -----------------------------------------------------------------------
+    Modelo de referencia de regiones REData.
+
+    Capa: Silver / Reference
+    Origen: seed regions
+    Materialización: table
     Granularidad: region_name
     Clave: region_id, equivalente al geo_id original. 
+
+    Normaliza el catalogo de ambitos geograficos para poder relacionar las 
+    mediciones de balance con una dimension geografica estable.
+    =======================================================================
 */
 
 with
@@ -20,6 +30,7 @@ src_regions as (
 renamed_casted as (
 
     select
+        -- Se conserva geo_id como clave natural de region
         geo_id::integer          as region_id,
         geo_name::varchar        as region_name,
         geo_type::varchar        as region_type

@@ -1,8 +1,18 @@
 /*
-    Construye la tabla de referencia de componentes de precio a partir del nombre 
-    del grupo del componente de presente en el modelo staging market.
-    Granularidad: component_name
-    Clave: component_id, generada a partir de component_name y group_name. 
+    =======================================================================
+    ref_price_component
+    -----------------------------------------------------------------------
+    Modelo de referencia de componentes de precio.
+
+    Capa: Silver / Reference
+    Origen: stg_red_electrica__market_measurement
+    Materialización: table
+    Granularidad: component_name + group_name
+    Clave: component_id, generada a partir de component_name y group_name.
+
+    Construye un catalogo analitico de componentes del precio electrico a 
+    partir de los datos publicados por REData.
+    =======================================================================
 */
 
 with
@@ -21,10 +31,13 @@ src_market as (
 renamed_casted as (
 
     select
+        -- Clave surrogate estable para analisis, independiente del endpoint de origen
         {{ dbt_utils.generate_surrogate_key([
             'component_name',
             'group_name'
         ]) }}                                                       as component_id,
+
+        -- Identificador original de REData conservado para trazabilidad
         component_id::varchar                                       as redata_component_id,
         component_name::varchar                                     as component_name,
         group_name::varchar                                         as group_name,

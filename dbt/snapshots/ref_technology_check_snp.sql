@@ -1,8 +1,19 @@
 /*
-    Snapshot de tecnologías eléctricas de REData.
-    Detecta cambios en el nombre, categoría energética o flag de tecnología compuesta.
+    =======================================================================
+    ref_technology_check_snp
+    -----------------------------------------------------------------------
+    Snapshot de tecnologias electricas.
+
+    Capa: Snapshots
+    Origen: ref_technology
+    Materialización: table
+    Estrategia: check
     Granularidad: technology_id
-    Clave: technology_id
+    Clave: technology_id.
+
+    Se encarga de conservar el historico de cambios del catalogo de tecnologias
+    electricas construido a partir de REData.
+    =======================================================================
 */
 
 {% snapshot ref_technology_check_snp %}
@@ -18,7 +29,7 @@
             'energy_category_id',
             'is_composite'
         ],
-        invalidate_hard_deletes=True
+        hard_deletes='invalidate'
     )
 }}
 

@@ -8,13 +8,24 @@
 }}
 
 /*
-    Construye la tabla core de mediciones de generación eléctrica por tecnología
-    a partir de stg_generation_measurement y la referencia de tecnología.
+    =======================================================================
+    generation_measurements
+    -----------------------------------------------------------------------
+    Modelo core de mediciones de generacion electrica.
+
+    Capa: Silver / Core
+    Origen: stg_red_electrica__generation_measurement
+            ref_technology
+            ref_energy_category
+    Materialización: incremental
+    Estrategia incremental: merge
     Granularidad: technology_id + time_trunc + datetime_ree
     Clave: generation_id, generada a partir de technology_id, time_trunc 
     y datetime_ree.
 
-    Mantiene la última carga disponible por medición usando loaded_at.
+    Convierte las mediciones de generacion de REData en una tabla analitica
+    estable, asociado cada registro a una tecnologia normalizada.
+    =======================================================================
 */
 
 with
@@ -34,6 +45,7 @@ stg_generation as (
     from {{ ref('stg_red_electrica__generation_measurement') }}
 
     {% if is_incremental() %}
+        -- En ejecuciones incrementales solo procesa cargas nuevas o actualizadas
         where loaded_at >= (
             select coalesce(max(loaded_at), '1900-01-01'::timestamp_ntz)
             from {{ this }}
@@ -74,8 +86,11 @@ generation_joined as (
         g.source_percentage
     from stg_generation g
     left join ref_energy_category e
+        -- Primero se resuelve la categoria energetica para poder usarla en la clave de tecnologia
         on g.energy_group = e.energy_category_name
     left join ref_technology t
+        -- La tecnologia se verifica usando nombre, categoria y redata_technology_id
+        -- Se contempla el caso de identificadores nulos para no perder tecnologias validas
         on g.technology_name = t.technology_name
         and e.energy_category_id = t.energy_category_id
         and ( 
@@ -98,6 +113,8 @@ generation_deduplicado as (
         datetime_ree,
         value_mwh,
         source_percentage,
+
+        -- Ranking usado para conservar la ultima carga disponible por medicion
         {{ deduplicate_by_latest(
             partition_by=[
                 'technology_id',
@@ -116,6 +133,7 @@ generation_deduplicado as (
 final as (
 
     select
+        -- Clave surrogate estable para analisis, independiente del endpoint de origen
         {{ dbt_utils.generate_surrogate_key([
             'technology_id',
             'time_trunc',
@@ -130,6 +148,7 @@ final as (
         loaded_at
     from generation_deduplicado
     where ranking = 1
+        -- Se descartan mediciones que no hayan podido mapearse contra la referencia
         and technology_id is not null
     
 )
