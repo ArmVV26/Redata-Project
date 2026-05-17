@@ -40,6 +40,7 @@ renamed_casted as (
         month(date_day)                             as month_number,
         monthname(date_day)                         as month_name,
         year(date_day) * 100 + month(date_day)      as year_month,
+        to_char(date_day, 'YYYY-MM')                as year_month_label,
         day(date_day)                               as day_of_month,
         dayofweek(date_day)                         as day_of_week,
         dayname(date_day)                           as day_name
