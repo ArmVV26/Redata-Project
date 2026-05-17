@@ -1,3 +1,20 @@
+/*
+    =======================================================================
+    dim_region
+    -----------------------------------------------------------------------
+    Dimension de fechas.
+
+    Capa: Gold / Core
+    Origen: ref_regions
+    Materialización: table
+    Granularidad: region_id
+    Clave: region_id.
+
+    Expone el catalogo de ambitos geograficas para analizar mediciones de 
+    balance electrico por region.
+    =======================================================================
+*/
+
 with
 
 src_region as (

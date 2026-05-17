@@ -1,3 +1,23 @@
+/*
+    =======================================================================
+    monthly_renewable_vs_price
+    -----------------------------------------------------------------------
+    Mart mensual de generacion renovable frente a precio de mercado
+
+    Capa: Gold / Core
+    Origen: fct_generation
+            fct_market
+            dim_technology
+            dim_price_component
+    Materialización: table
+    Granularidad: month_start_date
+    Clave: monthly_renewable_vs_price_id.
+
+    Analiza la relacion entre el peso mensula de la generacion renovable y 
+    el precio del mercado diario electrico.
+    =======================================================================
+*/
+
 with 
 
 dim_technology as (
@@ -22,6 +42,8 @@ fct_generation as (
     inner join dim_technology t
         on g.technology_id = t.technology_id
     where g.time_trunc = 'month'
+
+        -- Se excluyen tecnologias compuestas para evitar doble conteo en los agregados
         and t.is_composite = false
 
 ),
@@ -30,13 +52,19 @@ monthly_generation as (
 
     select
         month_start_date,
+
+        -- Generacion renovable mensual
         sum(
             case 
                 when is_renewable then generation_mwh
                 else 0
             end
         )                                               as renewable_mwh,
+
+        -- Generacion total mensual usada como denominador
         sum(generation_mwh)                             as total_generation_mwh,
+
+        -- Ultima carga considerada dentro del agregada
         max(loaded_at)                                  as generation_loaded_at
     from fct_generation g
     group by
@@ -63,6 +91,7 @@ fct_market as (
     inner join dim_price_component pc
         on m.component_id = pc.component_id
     where m.time_trunc = 'month'
+        -- Se usa el componente 'Mercado diario' como referencia principal de precio
         and lower(pc.component_name) = 'mercado diario'
 
 ),
@@ -84,8 +113,11 @@ monthly_joined as (
         g.month_start_date,
         g.renewable_mwh,
         g.total_generation_mwh,
+
+        -- Peso renovable en ratio y porcentage
         div0(g.renewable_mwh, g.total_generation_mwh)                            as renewable_share,
         {{ to_percentage('div0(g.renewable_mwh, g.total_generation_mwh)') }}     as renewable_share_pct,
+
         m.market_price_eur_mwh,
         g.generation_loaded_at,
         m.market_loaded_at
@@ -107,10 +139,14 @@ final as (
         renewable_share,
         renewable_share_pct,
         market_price_eur_mwh,
+
+        -- Variacion mensual en puntos porcentuales del peso renovable
         renewable_share_pct
             - lag(renewable_share_pct) over (
                 order by month_start_date
             )                                                           as renewable_share_pct_mom_change,
+        
+        -- Variacion relativa mensual del precio en ratio y porcentaje
         market_price_eur_mwh
             - lag(market_price_eur_mwh) over (
                 order by month_start_date
@@ -133,6 +169,7 @@ final as (
                 )
             )'
         ) }}                                                            as market_price_mom_change_pct,
+        
         generation_loaded_at,
         market_loaded_at
     from monthly_joined

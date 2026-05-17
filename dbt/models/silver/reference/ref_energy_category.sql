@@ -1,8 +1,19 @@
 /*
-    Construye la tabla de referencia de categorías energéticas a partir de los
-    grupos energéticos presentes en los modelos staging balance y generation.
+    =======================================================================
+    ref_energy_category
+    -----------------------------------------------------------------------
+    Modelo de referencia de categorias energeticas.
+
+    Capa: Silver / Reference
+    Origen: stg_red_electrica__balance_measurement
+            stg_red_electrica__generation_measurement
+    Materialización: table
     Granularidad: energy_category_name
     Clave: energy_category_id, generada a partir de energy_category_name. 
+
+    Unifica los grupos energeticos presentes en balance y generacion para 
+    construir una referencia comun reutilizable por las dimensiones y hechos.
+    =======================================================================
 */
 
 with
@@ -25,6 +36,7 @@ src_generation as (
 
 union_energy_group as (
 
+    -- Union que elimina duplicados entre los grupos presentes en balance y generacion
     select 
         energy_group
     from src_balance
@@ -40,6 +52,8 @@ renamed_casted as (
     select
         {{ dbt_utils.generate_surrogate_key(['energy_group']) }}        as energy_category_id,
         energy_group::varchar                                           as energy_category_name,
+
+        -- Flag analitico usado posteriormente para separar generacion renovable y no renovables
         case
             when lower(trim(energy_group)) = 'renovable' then true
             else false

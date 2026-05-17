@@ -1,8 +1,20 @@
 /*
-    Construye la tabla de referencia de tecnologías eléctricas a partir de las
-    tecnologías presentes en los modelos staging balance y generation.
+    =======================================================================
+    ref_technology
+    -----------------------------------------------------------------------
+    Modelo de referencia de tecnologias electricas.
+
+    Capa: Silver / Reference
+    Origen: stg_red_electrica__balance_measurement
+            stg_red_electrica__generation_measurement
+    Materialización: table
     Granularidad: technology_name + energy_category_id
-    Clave: technology_id, generada a partir de technology_name y energy_category_id. 
+    Clave: technology_id, generada a partir de technology_name y energy_category_id.
+
+    Construye un catalogo comun de tecnologias electricas a partir de los 
+    endpoints de balance y generacion, resolviendo diferencias entre los 
+    identificadores originales de REData.
+    =======================================================================
 */
 
 with
@@ -31,6 +43,7 @@ src_generation as (
 
 union_technology as (
 
+    -- Unifica las tecnologias detectadas en balance y generacion
     select
         redata_technology_id,
         technology_name,
@@ -49,6 +62,8 @@ union_technology as (
 
 technology_deduplicado as (
 
+    -- Deduplia tecnologias equivalentes por nombre, grupo energetico y flag composite
+    -- En caso de igualdad, se conserva la tecnologia con menor referencia informativa
     select
         technology_name,
         energy_group,
@@ -74,6 +89,7 @@ energy_category as (
 renamed_casted as (
 
     select
+        -- Clave surrogate estable para analisis, independiente del endpoint de origen
         {{ dbt_utils.generate_surrogate_key([
             't.technology_name',
             'e.energy_category_id'

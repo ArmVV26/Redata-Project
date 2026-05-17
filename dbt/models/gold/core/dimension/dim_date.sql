@@ -1,7 +1,25 @@
+/*
+    =======================================================================
+    dim_date
+    -----------------------------------------------------------------------
+    Dimension de fechas.
+
+    Capa: Gold / Core
+    Origen: dbt_utils.date_spine
+    Materialización: table
+    Granularidad: date_id
+    Clave: date_id.
+
+    Genera un calendario diario reutilizable para relacionar las facts con
+    atributos temporales como año, trimestre, mes o dia de la semana.
+    =======================================================================
+*/
+
 with
 
 dates as (
 
+     -- Calendario base del modelo analítico. Amplio para cubrir histórico y futuras cargas
     {{
         dbt_utils.date_spine(
             datepart="day",
