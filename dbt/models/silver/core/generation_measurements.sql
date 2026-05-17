@@ -147,7 +147,7 @@ final as (
         request_id,
         loaded_at
     from generation_deduplicado
-    where ranking = 
+    where ranking = 1
         -- Se descartan mediciones que no hayan podido mapearse contra la referencia
         and technology_id is not null
     

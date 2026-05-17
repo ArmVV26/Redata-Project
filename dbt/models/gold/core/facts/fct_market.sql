@@ -2,7 +2,7 @@
     =======================================================================
     fct_market
     -----------------------------------------------------------------------
-    Fact de mediciones de mercado electrico
+    Fact de mediciones de mercado electrico.
 
     Capa: Gold / Core
     Origen: market_measurements
@@ -66,7 +66,7 @@ final as (
         m.datetime_ree,
         m.value_eur_mwh                                     as market_component_eur_mwh,
 
-        -- Metrica original y version expresada en procentaje
+        -- Metrica original y version expresada en porcentaje
         m.source_percentage::float                          as market_share,
         {{ to_percentage('m.source_percentage') }}          as market_share_pct,
 

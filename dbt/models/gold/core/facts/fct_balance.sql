@@ -2,7 +2,7 @@
     =======================================================================
     fct_balance
     -----------------------------------------------------------------------
-    Fact de mediciones de balance electrico
+    Fact de mediciones de balance electrico.
 
     Capa: Gold / Core
     Origen: balance_measurements
@@ -77,7 +77,7 @@ final as (
         b.datetime_ree,
         b.value_mwh                                     as balance_mwh,
 
-        -- Metrica original y version expresada en procentaje
+        -- Metrica original y version expresada en porcentaje
         b.source_percentage::float                      as balance_share,
         {{ to_percentage('b.source_percentage') }}      as balance_share_pct,
 

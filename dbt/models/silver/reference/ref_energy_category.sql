@@ -53,7 +53,7 @@ renamed_casted as (
         {{ dbt_utils.generate_surrogate_key(['energy_group']) }}        as energy_category_id,
         energy_group::varchar                                           as energy_category_name,
 
-        -- Flag analitico usado posteriormente para separar generacion renovable y no renovables
+        -- Flag analitico usado posteriormente para separar generacion renovable y no renovable
         case
             when lower(trim(energy_group)) = 'renovable' then true
             else false

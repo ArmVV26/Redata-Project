@@ -2,7 +2,7 @@
     =======================================================================
     ref_technology_check_snp
     -----------------------------------------------------------------------
-    Snapshot de componentes de precio electrico.
+    Snapshot de tecnologias electricas.
 
     Capa: Snapshots
     Origen: ref_technology
@@ -29,7 +29,7 @@
             'energy_category_id',
             'is_composite'
         ],
-        invalidate_hard_deletes=True
+        hard_deletes='invalidate'
     )
 }}
 

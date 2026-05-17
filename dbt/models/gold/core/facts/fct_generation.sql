@@ -2,7 +2,7 @@
     =======================================================================
     fct_generation
     -----------------------------------------------------------------------
-    Fact de mediciones de generacion electrica
+    Fact de mediciones de generacion electrica.
 
     Capa: Gold / Core
     Origen: generation_measurements
@@ -66,7 +66,7 @@ final as (
         g.datetime_ree,
         g.value_mwh                                     as generation_mwh,
 
-        -- Metrica original y version expresada en procentaje
+        -- Metrica original y version expresada en porcentaje
         g.source_percentage                             as generation_share,
         {{ to_percentage('g.source_percentage') }}      as generation_share_pct,
 

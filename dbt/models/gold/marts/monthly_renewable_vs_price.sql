@@ -4,7 +4,7 @@
     -----------------------------------------------------------------------
     Mart mensual de generacion renovable frente a precio de mercado
 
-    Capa: Gold / Core
+    Capa: Gold / Marts
     Origen: fct_generation
             fct_market
             dim_technology
@@ -13,7 +13,7 @@
     Granularidad: month_start_date
     Clave: monthly_renewable_vs_price_id.
 
-    Analiza la relacion entre el peso mensula de la generacion renovable y 
+    Analiza la relacion entre el peso mensual de la generacion renovable y 
     el precio del mercado diario electrico.
     =======================================================================
 */
@@ -64,7 +64,7 @@ monthly_generation as (
         -- Generacion total mensual usada como denominador
         sum(generation_mwh)                             as total_generation_mwh,
 
-        -- Ultima carga considerada dentro del agregada
+        -- Ultima carga considerada dentro del agregado
         max(loaded_at)                                  as generation_loaded_at
     from fct_generation g
     group by
@@ -114,7 +114,7 @@ monthly_joined as (
         g.renewable_mwh,
         g.total_generation_mwh,
 
-        -- Peso renovable en ratio y porcentage
+        -- Peso renovable en ratio y porcentaje
         div0(g.renewable_mwh, g.total_generation_mwh)                            as renewable_share,
         {{ to_percentage('div0(g.renewable_mwh, g.total_generation_mwh)') }}     as renewable_share_pct,
 

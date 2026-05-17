@@ -10,7 +10,7 @@
     Granularidad: request_id + redata_technology_id + time_trunc + datetime_ree
 
     Aplana la respuesta JSON de estructura de generacion, dejando una fila por
-    tecnologia, granularidad temporal y fechas REE.
+    tecnologia, granularidad temporal y fecha REE.
     =======================================================================
 */
 

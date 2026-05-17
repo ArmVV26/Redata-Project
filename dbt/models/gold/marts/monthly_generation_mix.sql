@@ -4,7 +4,7 @@
     -----------------------------------------------------------------------
     Mart mensual de mix de generacion electrica
 
-    Capa: Gold / Core
+    Capa: Gold / Marts
     Origen: fct_generation
             dim_technology
     Materialización: table
@@ -53,7 +53,7 @@ monthly_generation as (
         -- Generacion mensual por tecnologia
         sum(generation_mwh)     as generation_mwh,
 
-        -- Ultima carga considerada dentro del agregada
+        -- Ultima carga considerada dentro del agregado
         max(loaded_at)          as loaded_at
         from fct_generation
         group by
@@ -66,7 +66,7 @@ monthly_total_generation as (
     select
         month_start_date,
 
-        -- Calculo el peso de cada tecnologia por mes
+        -- Total mensual usado como denominador para calcular el peso de cada tecnologia
         sum(generation_mwh)     as total_generation_mwh
     from monthly_generation
     group by 

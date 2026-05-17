@@ -62,8 +62,8 @@ union_technology as (
 
 technology_deduplicado as (
 
-    -- Deduplia tecnologias equivalentes por nombre, grupo energetico y flag composite
-    -- En caso de igualdad, se conserva la tecnologia con menor referencia informativa
+    -- Deduplica tecnologias equivalentes por nombre, grupo energetico y flag composite
+    -- En caso de igualdad, se conserva el menor redata_technology_id como referencia informativa
     select
         technology_name,
         energy_group,

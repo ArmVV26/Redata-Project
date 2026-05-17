@@ -10,7 +10,7 @@
     Granularidad: request_id + component_id + time_trunc + datetime_ree
 
     Aplana la respuesta JSON de componentes de precio de la electricidad,
-    normliza los campos principales y conserva la trazabilidad de la carga.
+    normaliza los campos principales y conserva la trazabilidad de la carga.
     =======================================================================
 */
 

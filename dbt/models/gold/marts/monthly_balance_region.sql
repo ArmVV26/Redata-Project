@@ -4,7 +4,7 @@
     -----------------------------------------------------------------------
     Mart mensual de balance electrico por region y tecnologia
 
-    Capa: Gold / Core
+    Capa: Gold / Marts
     Origen: fct_balance
             dim_technology
     Materialización: table
@@ -55,7 +55,7 @@ monthly_balance as (
         -- Balance mensual por region y tecnologia
         sum(balance_mwh)        as balance_mwh,
 
-        -- Ultima carga considerada dentro del agregada
+        -- Ultima carga considerada dentro del agregado
         max(loaded_at)          as loaded_at
     from fct_balance
     group by
@@ -71,7 +71,7 @@ monthly_region_total_balance as (
         month_start_date,
         region_id,
 
-        -- Total mensual regional usado denominador
+        -- Total mensual regional usado como denominador
         sum(balance_mwh)        as total_region_balance_mwh
     from monthly_balance
     group by
@@ -94,7 +94,7 @@ final as (
         b.balance_mwh,
         t.total_region_balance_mwh,
 
-        -- Peso de cada tecnologia dentro del balance mesnual de la region
+        -- Peso de cada tecnologia dentro del balance mensual de la region
         div0(b.balance_mwh, t.total_region_balance_mwh)                             as region_balance_share,
         {{ to_percentage('div0(b.balance_mwh, t.total_region_balance_mwh)') }}      as region_balance_share_pct,
         
