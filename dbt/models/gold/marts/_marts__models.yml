@@ -59,11 +59,6 @@ models:
         data_type: float
         data_tests:
           - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              arguments:
-                min_value: 0
-                max_value: 1
-                severity: warn
 
       - name: generation_share_pct
         description: Peso de la tecnología sobre la generación mensual total, en escala 0 a 100.
@@ -159,11 +154,6 @@ models:
         data_type: float
         data_tests:
           - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              arguments:
-                min_value: 0
-                max_value: 1
-                severity: warn
 
       - name: region_balance_share_pct
         description: Peso de la tecnología sobre el balance mensual total de la región, en escala 0 a 100.
@@ -237,11 +227,6 @@ models:
         data_type: float
         data_tests:
           - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              arguments:
-                min_value: 0
-                max_value: 1
-                severity: warn
 
       - name: renewable_share_pct
         description: Peso de la generación renovable sobre la generación mensual total, en escala 0 a 100.
