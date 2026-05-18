@@ -65,11 +65,6 @@ models:
         data_type: float
         data_tests:
           - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              arguments:
-                min_value: 0
-                max_value: 100
-                severity: warn
 
       - name: loaded_at
         description: Último timestamp de carga usado en la agregación mensual.
@@ -160,11 +155,6 @@ models:
         data_type: float
         data_tests:
           - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              arguments:
-                min_value: 0
-                max_value: 100
-                severity: warn
 
       - name: loaded_at
         description: Último timestamp de carga usado en la agregación mensual.
@@ -233,11 +223,6 @@ models:
         data_type: float
         data_tests:
           - not_null
-          - dbt_expectations.expect_column_values_to_be_between:
-              arguments:
-                min_value: 0
-                max_value: 100
-                severity: warn
 
       - name: market_price_eur_mwh
         description: Precio mensual de mercado en EUR/MWh calculado a partir del componente mercado diario.

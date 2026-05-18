@@ -31,9 +31,9 @@ renamed_casted as (
 
     select
         -- Se conserva geo_id como clave natural de region
-        geo_id::integer          as region_id,
-        geo_name::varchar        as region_name,
-        geo_type::varchar        as region_type
+        geo_id::integer             as region_id,
+        trim(geo_name)::varchar     as region_name,
+        geo_type::varchar           as region_type
     from src_regions
 
 )
