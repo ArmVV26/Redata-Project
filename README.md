@@ -42,6 +42,7 @@
 - [🧪 Calidad de Datos](#-calidad-de-datos)
 - [🚀 Instalación y Configuración](#-instalación-y-configuración)
   - [Requisitos Previos](#requisitos-previos)
+  - [Clonar el Repositorio](#clonar-el-repositorio)
   - [Variables de Entorno](#variables-de-entorno)
 - [⚙️ Ejecución del Proyecto](#️-ejecución-del-proyecto)
   - [Ingesta de Datos](#ingesta-de-datos)
@@ -388,6 +389,15 @@ Estos tests permiten validar aspectos clave como:
 - **Power BI Desktop**
 - **Git**
 - Cuenta o acceso a la API pública de **REData**
+
+---
+
+### Clonar el Repositorio
+
+```bash
+git clone https://github.com/ArmVV26/Redata-Project.git
+cd Redata-Project
+```
 
 ---
 
