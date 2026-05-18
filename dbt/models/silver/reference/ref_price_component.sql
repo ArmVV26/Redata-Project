@@ -39,8 +39,8 @@ renamed_casted as (
 
         -- Identificador original de REData conservado para trazabilidad
         component_id::varchar                                       as redata_component_id,
-        component_name::varchar                                     as component_name,
-        group_name::varchar                                         as group_name,
+        trim(component_name)::varchar                               as component_name,
+        trim(group_name)::varchar                                   as group_name,
         is_composite::boolean                                       as is_composite
     from src_market
     
