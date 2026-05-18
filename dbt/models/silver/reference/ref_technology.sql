@@ -95,7 +95,7 @@ renamed_casted as (
             'e.energy_category_id'
         ]) }}                                           as technology_id,
         t.redata_technology_id::integer                 as redata_technology_id,
-        t.technology_name::varchar                      as technology_name,
+        trim(t.technology_name)::varchar                as technology_name,
         e.energy_category_id::varchar                   as energy_category_id,
         t.is_composite::boolean                         as is_composite
     from technology_deduplicado t

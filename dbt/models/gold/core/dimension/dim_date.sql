@@ -56,6 +56,7 @@ select
     month_number,
     month_name,
     year_month,
+    year_month_label,
     day_of_month,
     day_of_week,
     day_name

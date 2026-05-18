@@ -97,6 +97,12 @@ models:
         data_type: integer
         data_tests:
           - not_null
+      
+      - name: year_month_label
+        description: Identificador numérico del año y mes en formato YYYY-MM.
+        data_type: varchar
+        data_tests:
+          - not_null
 
       - name: day_of_month
         description: Día del mes.
