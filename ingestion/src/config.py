@@ -10,6 +10,17 @@ TIME_TRUNC = "month"
 
 BASE_URL = "https://apidatos.ree.es/es/datos"
 
+# Configuración de llamadas a la API
+REQUEST_TIMEOUT        = 30    
+SLEEP_BETWEEN_REQUESTS = 2.5   
+MAX_RETRIES            = 3     
+RETRY_BACKOFF_BASE     = 5     
+RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
+
+# Database y Schema
+BRONZE_DATABASE = "PRO_REDATA_BRONZE"
+BRONZE_SCHEMA = "RAW"
+
 # Formato: "geo_id": "geo_limit"
 GEO_CANDIDATES = {
     "8741": "peninsular",
