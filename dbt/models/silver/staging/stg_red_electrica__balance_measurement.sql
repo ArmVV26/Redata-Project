@@ -26,6 +26,9 @@ src_balance_measurement as (
         time_trunc,
         raw_json        
     from {{ source('redata_raw', 'balance_response') }}
+    where error_message is null
+        and http_status_code between 200 and 299
+        and raw_json is not null
 
 ),
  
