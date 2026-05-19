@@ -41,6 +41,10 @@ jobs:
       SNOWFLAKE_SCHEMA:    ${{ secrets.SNOWFLAKE_SCHEMA }}
       SNOWFLAKE_ROLE:      ${{ secrets.SNOWFLAKE_ROLE }}
 
+    defaults:
+      run:
+        working-directory: ingestion
+
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
@@ -71,12 +75,12 @@ jobs:
       - name: Ejecutar ingesta (monthly / backfill)
         if: steps.params.outputs.mode != 'custom'
         run: |
-          python main.py --mode ${{ steps.params.outputs.mode }}
+          python src/main.py --mode ${{ steps.params.outputs.mode }}
 
       - name: Ejecutar ingesta (custom)
         if: steps.params.outputs.mode == 'custom'
         run: |
-          python main.py \
+          python src/main.py \
             --mode custom \
             --start-date "${{ steps.params.outputs.start_date }}" \
             --end-date   "${{ steps.params.outputs.end_date }}"
