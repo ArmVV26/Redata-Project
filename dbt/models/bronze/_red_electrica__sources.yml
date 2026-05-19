@@ -92,6 +92,18 @@ sources:
             data_tests:
               - not_null
 
+          - name: http_status_code
+            description: >
+              Código HTTP devuelto por la API de REData
+              200-299 indica éxito. Null si no hubo respuesta.
+            data_type: integer
+
+          - name: error_message
+            description: >
+              Mensaje de error si la petición falló. 
+              Null si la carga fue correcta
+            data_type: varchar
+
           - name: raw_json
             description: Respuesta JSON completa de la API, sin procesar.
             data_type: variant
@@ -155,6 +167,18 @@ sources:
             data_tests:
               - not_null
 
+          - name: http_status_code
+            description: >
+              Código HTTP devuelto por la API de REData
+              200-299 indica éxito. Null si no hubo respuesta.
+            data_type: integer
+
+          - name: error_message
+            description: >
+              Mensaje de error si la petición falló. 
+              Null si la carga fue correcta
+            data_type: varchar
+
           - name: raw_json
             description: Respuesta JSON completa de la API, sin procesar.
             data_type: variant
@@ -217,6 +241,18 @@ sources:
             data_type: varchar
             data_tests:
               - not_null
+          
+          - name: http_status_code
+            description: >
+              Código HTTP devuelto por la API de REData
+              200-299 indica éxito. Null si no hubo respuesta.
+            data_type: integer
+
+          - name: error_message
+            description: >
+              Mensaje de error si la petición falló. 
+              Null si la carga fue correcta
+            data_type: varchar
 
           - name: raw_json
             description: Respuesta JSON completa de la API, sin procesar.
