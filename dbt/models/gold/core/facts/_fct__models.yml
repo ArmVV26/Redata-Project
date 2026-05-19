@@ -243,7 +243,6 @@ models:
               - time_trunc
               - datetime_ree
 
-
   - name: fct_market
     description: >
       Hecho analítico de componentes del precio eléctrico por periodo temporal.
