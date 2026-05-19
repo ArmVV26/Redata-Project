@@ -86,33 +86,62 @@ jobs:
             --end-date   "${{ steps.params.outputs.end_date }}"
 
   # ────────────────────────────────────────────────────────────────
-  dbt_cloud:
-    name: "Lanzar job dbt Cloud"
-    runs-on: ubuntu-latest
-    needs: ingestion          # Solo se ejecuta si ingestion termina OK
-
-    steps:
-      - name: Disparar job dbt Cloud
-        id: trigger
-        run: |
-          RESPONSE=$(curl -s -w "\n%{http_code}" \
-            --request POST \
-            --url "https://cloud.getdbt.com/api/v2/accounts/${{ secrets.DBT_CLOUD_ACCOUNT_ID }}/jobs/${{ secrets.DBT_CLOUD_JOB_ID }}/run/" \
-            --header "Authorization: Token ${{ secrets.DBT_CLOUD_API_TOKEN }}" \
-            --header "Content-Type: application/json" \
-            --data '{"cause": "Triggered by GitHub Actions"}')
-
-          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
-          BODY=$(echo "$RESPONSE" | head -1)
-
-          echo "HTTP status: $HTTP_CODE"
-          echo "Response: $BODY"
-
-          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
-            echo "Error al lanzar el job dbt Cloud. HTTP status: $HTTP_CODE"
-            exit 1
-          fi
-
-          RUN_ID=$(echo "$BODY" | python3 -c "import sys, json; print(json.load(sys.stdin)['data']['id'])")
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
-          echo "Job lanzado con run_id: $RUN_ID"
+  # NOTA: El job de dbt Cloud está implementado pero desactivado.
+  #
+  # En un entorno con acceso a dbt Cloud (plan Team o Developer con
+  # API habilitada), este job dispararía automáticamente el job de
+  # transformación Bronze → Silver → Gold tras cada ingesta correcta.
+  #
+  # Para activarlo se necesitarían estos tres secrets en GitHub:
+  #   - DBT_CLOUD_API_TOKEN    → Settings > API Tokens en dbt Cloud
+  #   - DBT_CLOUD_ACCOUNT_ID   → visible en la URL de dbt Cloud
+  #   - DBT_CLOUD_JOB_ID       → visible en la URL del job en dbt Cloud
+  #
+  # Motivo por el que está desactivado: el plan gratuito actual de
+  # dbt Cloud no incluye acceso a la API REST de jobs.
+  # Alternativa viable: migrar a dbt Core y ejecutar `dbt build`
+  # directamente desde GitHub Actions sin depender de dbt Cloud.
+  #
+  # dbt_cloud:
+  #   name: "Lanzar job dbt Cloud"
+  #   runs-on: ubuntu-latest
+  #   needs: ingestion
+  #
+  #   steps:
+  #     - name: Disparar job dbt Cloud
+  #       id: trigger
+  #       run: |
+  #         RESPONSE=$(curl -s -w "\n%{http_code}" \
+  #           --request POST \
+  #           --url "https://cloud.getdbt.com/api/v2/accounts/${{ secrets.DBT_CLOUD_ACCOUNT_ID }}/jobs/${{ secrets.DBT_CLOUD_JOB_ID }}/run/" \
+  #           --header "Authorization: Token ${{ secrets.DBT_CLOUD_API_TOKEN }}" \
+  #           --header "Content-Type: application/json" \
+  #           --data '{"cause": "Triggered by GitHub Actions"}')
+  #
+  #         HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+  #         BODY=$(echo "$RESPONSE" | head -1)
+  #
+  #         if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+  #           echo "Error al lanzar el job dbt Cloud. HTTP status: $HTTP_CODE"
+  #           exit 1
+  #         fi
+  #
+  #         RUN_ID=$(echo "$BODY" | python3 -c "import sys, json; print(json.load(sys.stdin)['data']['id'])")
+  #         echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+  #         echo "Job lanzado con run_id: $RUN_ID"
+  #
+  #     - name: Esperar resultado dbt Cloud
+  #       run: |
+  #         RUN_ID=${{ steps.trigger.outputs.run_id }}
+  #         for i in $(seq 1 20); do
+  #           sleep 30
+  #           STATUS=$(curl -s \
+  #             --request GET \
+  #             --url "https://cloud.getdbt.com/api/v2/accounts/${{ secrets.DBT_CLOUD_ACCOUNT_ID }}/runs/$RUN_ID/" \
+  #             --header "Authorization: Token ${{ secrets.DBT_CLOUD_API_TOKEN }}" \
+  #             | python3 -c "import sys, json; d=json.load(sys.stdin)['data']; print(d['status_humanized'])")
+  #           echo "Intento $i/20 — Status: $STATUS"
+  #           if [ "$STATUS" = "Success" ]; then exit 0; fi
+  #           if [ "$STATUS" = "Error" ] || [ "$STATUS" = "Cancelled" ]; then exit 1; fi
+  #         done
+  #         exit 1
